@@ -1,1 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo en vivo · La Clínica del Celular</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=Georgia&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0a0a;font-family:Georgia,serif;color:#000;padding-bottom:40px}
+  .loading{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:999}
+  .spinner{width:40px;height:40px;border:3px solid #333;border-top-color:#ffe600;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .wrap{max-width:780px;margin:0 auto;background:#fff;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:50;background:#000;padding:12px 16px}
+  .search{width:100%;background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:11px 16px;color:#fff;font-family:Roboto Mono,monospace;font-size:14px;outline:none}
+  .search:focus{border-color:#ffe600}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;background:#1a5e1a;color:#7fff7f;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:1px;margin-top:8px}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#7fff7f;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .header{background:#000;padding:28px 20px 16px;text-align:center}
+  .header img{max-width:300px;width:75%;height:auto}
+  .header .sub{margin-top:14px;font-family:Georgia,serif;font-size:11px;color:#aaa;letter-spacing:5px;font-style:italic}
+  .contact{background:#000;padding:12px 20px;text-align:center;color:#ddd;font-family:Arial,sans-serif;font-size:12px;border-bottom:4px solid #ffe600}
+  .content{padding:0 14px}
+  .empty{text-align:center;padding:50px 20px;color:#888;font-family:Arial,sans-serif}
+</style>
+</head>
+<body>
 
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div style="color:#ffe600;font-family:Arial,sans-serif;font-size:13px;letter-spacing:2px">CARGANDO CATALOGO...</div>
+</div>
+
+<div class="wrap">
+  <div class="header">
+    <img src="logo.png" alt="La Clinica del Celular" onerror="this.style.display='none'">
+    <div class="sub">— LISTA DE PRECIOS EN VIVO —</div>
+  </div>
+  <div class="contact">
+    Ituzaingo 469 &nbsp;&nbsp;&nbsp; 11 2799-9050
+  </div>
+  <div class="topbar">
+    <input type="text" class="search" id="search" placeholder="Buscar producto, marca o modelo...">
+    <div style="text-align:center"><span class="live-badge"><span class="live-dot"></span>ACTUALIZADO EN TIEMPO REAL</span></div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmx5IGM5lDDDDD_xrJ1Rmg8FLG3hRWjsE",
+  authDomain: "clinica-celular-f6827.firebaseapp.com",
+  projectId: "clinica-celular-f6827",
+  storageBucket: "clinica-celular-f6827.firebasestorage.app",
+  messagingSenderId: "641319344661",
+  appId: "1:641319344661:web:5bb06e704088f1a3e1571e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+var PRODUCTOS = [];
+var filtro = '';
+
+var cats=['Módulo','Batería','Placa de Carga'];
+var nombres={'Módulo':'MODULOS','Batería':'BATERIAS','Placa de Carga':'PLACAS DE CARGA'};
+var catColor={'Módulo':'#7cb342','Batería':'#e63946','Placa de Carga':'#2c2c2c'};
+var headerTextColor={'Módulo':'#000','Batería':'#000','Placa de Carga':'#fff'};
+var ORDEN_FIJO={'samsung':1,'motorola':2,'iphone':3,'apple':3,'xiaomi':4,'tcl':5,'lg':6};
+
+function getOrdenMarca(marca, productos){
+  var m=marca.toLowerCase().trim();
+  for(var key in ORDEN_FIJO){ if(m.indexOf(key)>=0) return ORDEN_FIJO[key]; }
+  var ordenesValidos=productos.map(function(p){return p.orden||0;}).filter(function(o){return o>0;});
+  if(ordenesValidos.length>0) return 100+Math.min.apply(null,ordenesValidos);
+  return 9999;
+}
+function espaciar(txt){ return txt.toUpperCase().split('').join(' '); }
+function fmt(n){ return '$ '+Number(n||0).toLocaleString('es-AR'); }
+
+function filaProducto(p, esUltima){
+  var ag=p.stock===0;
+  var oferta=!!p.oferta && !ag;
+  var marco=!!p.marco && !ag;
+  var precioStr=ag?'SIN STOCK':fmt(p.precio);
+  var bb=esUltima?'':'border-bottom:1px solid #e8e8e8;';
+  var nombre=p.nombre||'';
+  var fs=10;
+  if(nombre.length>22) fs=9;
+  if(nombre.length>28) fs=8;
+  if(nombre.length>35) fs=7.5;
+  var nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  var mid='';
+  if(oferta){
+    mid='<span style="display:inline-block;background:#000;color:#ffe600;font-family:Arial;font-size:7px;font-weight:900;padding:2px 5px;border-radius:2px">OFERTA</span>';
+    if(marco) mid+='<br><span style="display:inline-block;background:#9a4d00;color:#fff;font-family:Arial;font-size:7px;font-weight:900;padding:2px 5px;border-radius:2px;margin-top:2px">C/M</span>';
+  } else if(marco){
+    mid='<span style="display:inline-block;background:#9a4d00;color:#fff;font-family:Arial;font-size:7px;font-weight:900;padding:2px 5px;border-radius:2px">C/M</span>';
+  }
+  var bg='#fff';
+  if(oferta) bg='#ffe600';
+  else if(marco) bg='#ffd4a3';
+  else if(!ag && p.color) bg=p.color;
+  var colorP=ag?'#c00':'#000';
+  var colorN=ag?'#888':'#000';
+  return '<tr style="background:'+bg+'">'+
+    '<td style="'+nameCell+';color:'+colorN+';font-weight:'+(oferta?'600':'500')+'">'+(oferta?'(OF) ':'')+nombre+'</td>'+
+    '<td style="padding:8px 4px;'+bb+'text-align:center;width:48px">'+mid+'</td>'+
+    '<td style="padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:10px;color:'+colorP+';font-weight:700;text-align:right;white-space:nowrap;width:80px">'+precioStr+'</td>'+
+  '</tr>';
+}
+
+function tablaProductos(prods){
+  var mid=Math.ceil(prods.length/2);
+  var c1=prods.slice(0,mid), c2=prods.slice(mid);
+  function col(ps){
+    if(ps.length===0) return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"></table>';
+    return '<table style="width:100%;border-collapse:collapse;table-layout:fixed">'+
+      '<colgroup><col style="width:auto"><col style="width:48px"><col style="width:80px"></colgroup>'+
+      '<thead><tr style="background:#f5f5f5">'+
+        '<th style="padding:5px 10px;font-family:Arial;font-size:8px;color:#666;text-align:left;border-bottom:1px solid #ccc">PRODUCTO</th>'+
+        '<th style="border-bottom:1px solid #ccc"></th>'+
+        '<th style="padding:5px 10px;font-family:Arial;font-size:8px;color:#666;text-align:right;border-bottom:1px solid #ccc">PRECIO</th>'+
+      '</tr></thead><tbody>'+
+      ps.map(function(p,i){return filaProducto(p,i===ps.length-1);}).join('')+
+      '</tbody></table>';
+  }
+  return '<table style="width:100%;border-collapse:collapse"><tr>'+
+    '<td style="vertical-align:top;width:50%;border-right:1px solid #000">'+col(c1)+'</td>'+
+    '<td style="vertical-align:top;width:50%">'+col(c2)+'</td>'+
+  '</tr></table>';
+}
+
+function render(){
+  var cont=document.getElementById('content');
+  var f=filtro.toLowerCase().trim();
+  var html='';
+  var hayAlgo=false;
+
+  cats.forEach(function(cat){
+    var prodsCat=PRODUCTOS.filter(function(p){
+      if(p.categoria!==cat) return false;
+      if(!f) return true;
+      return (p.nombre||'').toLowerCase().indexOf(f)>=0 || (p.modelo||'').toLowerCase().indexOf(f)>=0;
+    });
+    if(prodsCat.length===0) return;
+    hayAlgo=true;
+
+    var grupos={};
+    prodsCat.forEach(function(p){ var m=(p.modelo||'Sin marca').trim(); if(!grupos[m])grupos[m]=[]; grupos[m].push(p); });
+    var marcas=Object.keys(grupos).sort(function(a,b){
+      var oa=getOrdenMarca(a,grupos[a]), ob=getOrdenMarca(b,grupos[b]);
+      if(oa!==ob) return oa-ob;
+      return a.localeCompare(b,'es');
+    });
+    marcas.forEach(function(m){ grupos[m].sort(function(a,b){return a.nombre.localeCompare(b.nombre,'es');}); });
+
+    var color=catColor[cat], ht=headerTextColor[cat];
+    html+='<div style="margin-top:18px;border:1px solid #000;background:#fff">';
+    html+='<div style="background:'+color+';padding:13px 18px;text-align:center;border-bottom:1px solid #000"><div style="font-family:Georgia,serif;color:'+ht+';font-size:15px;font-weight:900;letter-spacing:4px">LISTA DE '+nombres[cat]+'</div></div>';
+    marcas.forEach(function(marca,idx){
+      html+='<div style="background:'+color+';padding:9px 18px;text-align:center'+(idx>0?';border-top:1px solid #000':'')+'"><div style="font-family:Georgia,serif;color:'+ht+';font-size:13px;font-weight:900;letter-spacing:5px">'+espaciar(marca)+'</div></div>';
+      html+='<div style="border-top:1px solid #000">'+tablaProductos(grupos[marca])+'</div>';
+    });
+    html+='</div>';
+  });
+
+  if(!hayAlgo){
+    html='<div class="empty">'+(f?'No se encontraron productos con "'+filtro+'"':'No hay productos cargados')+'</div>';
+  }
+
+  if(hayAlgo){
+    html+='<div style="background:#000;padding:16px;text-align:center;border-top:4px solid #ffe600;margin-top:24px">'+
+      '<div style="font-family:Georgia,serif;font-size:10px;color:#ffe600;letter-spacing:2px;font-style:italic">— Gracias por su preferencia —</div>'+
+    '</div>';
+  }
+
+  cont.innerHTML=html;
+}
+
+document.getElementById('search').addEventListener('input', function(e){
+  filtro=e.target.value;
+  render();
+});
+
+onSnapshot(doc(db,'clinica','datos'), function(snap){
+  document.getElementById('loading').style.display='none';
+  if(snap.exists()){
+    var data=snap.data();
+    PRODUCTOS=(data.productos||[]).filter(function(p){
+      return cats.indexOf(p.categoria)>=0;
+    });
+  } else {
+    PRODUCTOS=[];
+  }
+  render();
+}, function(err){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').innerHTML='<div class="empty">Error: '+err.message+'</div>';
+});
+</script>
+</body>
+  </html>

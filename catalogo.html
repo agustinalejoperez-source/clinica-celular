@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo en vivo · La Clínica del Celular</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Catálogo en vivo - La Clínica del Celular">
+<meta property="og:description" content="Lista de precios actualizada en tiempo real. Módulos, baterías y placas de carga. Ituzaingó 469 · 11 2799-9050">
+<meta property="og:image" content="https://agustinalejoperez-source.github.io/clinica-celular/logo.png">
+<meta property="og:url" content="https://agustinalejoperez-source.github.io/clinica-celular/catalogo.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Catálogo en vivo - La Clínica del Celular">
+<meta name="twitter:description" content="Lista de precios actualizada en tiempo real. Módulos, baterías y placas de carga.">
+<meta name="twitter:image" content="https://agustinalejoperez-source.github.io/clinica-celular/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=Georgia&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -24,6 +33,13 @@
   .contact{background:#000;padding:12px 20px;text-align:center;color:#ddd;font-family:Arial,sans-serif;font-size:12px;border-bottom:4px solid #ffe600}
   .content{padding:0 14px}
   .empty{text-align:center;padding:50px 20px;color:#888;font-family:Arial,sans-serif}
+  .cat-menu{display:flex;gap:8px;padding:12px 14px 4px;flex-wrap:wrap;justify-content:center}
+  .cat-btn{flex:1;min-width:90px;background:#1a1a1a;border:2px solid #333;border-radius:10px;padding:12px 8px;color:#ccc;font-family:Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.15s;text-align:center}
+  .cat-btn:hover{border-color:#666}
+  .cat-btn.active-mod{background:#7cb342;border-color:#7cb342;color:#000}
+  .cat-btn.active-bat{background:#e63946;border-color:#e63946;color:#fff}
+  .cat-btn.active-pla{background:#2c2c2c;border-color:#888;color:#fff}
+  .cat-btn.active-todos{background:#ffe600;border-color:#ffe600;color:#000}
 </style>
 </head>
 <body>
@@ -42,8 +58,14 @@
     Ituzaingo 469 &nbsp;&nbsp;&nbsp; 11 2799-9050
   </div>
   <div class="topbar">
-    <input type="text" class="search" id="search" placeholder="Buscar producto, marca o modelo...">
+    <input type="text" class="search" id="search" placeholder="🔍 Buscar producto, marca o modelo...">
     <div style="text-align:center"><span class="live-badge"><span class="live-dot"></span>ACTUALIZADO EN TIEMPO REAL</span></div>
+  </div>
+  <div class="cat-menu" id="cat-menu">
+    <div class="cat-btn active-todos" data-cat="todos" onclick="setCategoria('todos',this)">TODOS</div>
+    <div class="cat-btn" data-cat="Módulo" onclick="setCategoria('Módulo',this)">MÓDULOS</div>
+    <div class="cat-btn" data-cat="Batería" onclick="setCategoria('Batería',this)">BATERÍAS</div>
+    <div class="cat-btn" data-cat="Placa de Carga" onclick="setCategoria('Placa de Carga',this)">PLACAS DE CARGA</div>
   </div>
   <div class="content" id="content"></div>
 </div>
@@ -66,6 +88,7 @@ const db = getFirestore(app);
 
 var PRODUCTOS = [];
 var filtro = '';
+var categoriaActiva = 'todos';
 
 var cats=['Módulo','Batería','Placa de Carga'];
 var nombres={'Módulo':'MODULOS','Batería':'BATERIAS','Placa de Carga':'PLACAS DE CARGA'};
@@ -90,13 +113,21 @@ function filaProducto(p, esUltima){
   var precioStr=ag?'SIN STOCK':fmt(p.precio);
   var bb=esUltima?'':'border-bottom:1px solid #e8e8e8;';
   var nombre=p.nombre||'';
-  var fs=11;
-  if(nombre.length>18) fs=10;
-  if(nombre.length>24) fs=9;
-  if(nombre.length>30) fs=8;
-  if(nombre.length>38) fs=7;
-  if(nombre.length>46) fs=6.5;
-  var nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  var unaCol = window.innerWidth < 600;
+  var fs, nameCell;
+  if(unaCol){
+    fs=14;
+    if(nombre.length>34) fs=12.5;
+    nameCell='padding:9px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;line-height:1.25;word-break:break-word';
+  } else {
+    fs=11;
+    if(nombre.length>18) fs=10;
+    if(nombre.length>24) fs=9;
+    if(nombre.length>30) fs=8;
+    if(nombre.length>38) fs=7;
+    if(nombre.length>46) fs=6.5;
+    nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  }
   var mid='';
   if(oferta){
     mid='<span style="display:inline-block;background:#000;color:#ffe600;font-family:Arial;font-size:7px;font-weight:900;padding:2px 5px;border-radius:2px">OFERTA</span>';
@@ -113,7 +144,7 @@ function filaProducto(p, esUltima){
   return '<tr style="background:'+bg+'">'+
     '<td style="'+nameCell+';color:'+colorN+';font-weight:'+(oferta?'600':'500')+'">'+(oferta?'(OF) ':'')+nombre+'</td>'+
     '<td style="padding:8px 4px;'+bb+'text-align:center;width:48px">'+mid+'</td>'+
-    '<td style="padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:10px;color:'+colorP+';font-weight:700;text-align:right;white-space:nowrap;width:80px">'+precioStr+'</td>'+
+    '<td style="padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:11px;color:'+colorP+';font-weight:700;text-align:right;white-space:nowrap;width:85px">'+precioStr+'</td>'+
   '</tr>';
 }
 
@@ -122,7 +153,7 @@ function tablaProductos(prods){
   function col(ps){
     if(ps.length===0) return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"></table>';
     return '<table style="width:100%;border-collapse:collapse;table-layout:fixed">'+
-      '<colgroup><col style="width:auto"><col style="width:48px"><col style="width:80px"></colgroup>'+
+      '<colgroup><col style="width:auto"><col style="width:48px"><col style="width:85px"></colgroup>'+
       '<thead><tr style="background:#f5f5f5">'+
         '<th style="padding:5px 10px;font-family:Arial;font-size:8px;color:#666;text-align:left;border-bottom:1px solid #ccc">PRODUCTO</th>'+
         '<th style="border-bottom:1px solid #ccc"></th>'+
@@ -149,6 +180,7 @@ function render(){
   var hayAlgo=false;
 
   cats.forEach(function(cat){
+    if(categoriaActiva!=='todos' && cat!==categoriaActiva) return;
     var prodsCat=PRODUCTOS.filter(function(p){
       if(p.categoria!==cat) return false;
       if(!f) return true;
@@ -177,7 +209,7 @@ function render(){
   });
 
   if(!hayAlgo){
-    html='<div class="empty">'+(f?'No se encontraron productos con "'+filtro+'"':'No hay productos cargados')+'</div>';
+    html='<div class="empty">'+(f?'No se encontraron productos con "'+filtro+'"':'No hay productos en esta categoría')+'</div>';
   }
 
   if(hayAlgo){
@@ -193,6 +225,18 @@ document.getElementById('search').addEventListener('input', function(e){
   filtro=e.target.value;
   render();
 });
+
+window.setCategoria = function(cat, btn){
+  categoriaActiva = cat;
+  document.querySelectorAll('.cat-btn').forEach(function(b){
+    b.classList.remove('active-todos','active-mod','active-bat','active-pla');
+  });
+  if(cat==='todos') btn.classList.add('active-todos');
+  else if(cat==='Módulo') btn.classList.add('active-mod');
+  else if(cat==='Batería') btn.classList.add('active-bat');
+  else if(cat==='Placa de Carga') btn.classList.add('active-pla');
+  render();
+};
 
 window.addEventListener('resize', render);
 

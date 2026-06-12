@@ -90,10 +90,12 @@ function filaProducto(p, esUltima){
   var precioStr=ag?'SIN STOCK':fmt(p.precio);
   var bb=esUltima?'':'border-bottom:1px solid #e8e8e8;';
   var nombre=p.nombre||'';
-  var fs=10;
-  if(nombre.length>22) fs=9;
-  if(nombre.length>28) fs=8;
-  if(nombre.length>35) fs=7.5;
+  var fs=11;
+  if(nombre.length>18) fs=10;
+  if(nombre.length>24) fs=9;
+  if(nombre.length>30) fs=8;
+  if(nombre.length>38) fs=7;
+  if(nombre.length>46) fs=6.5;
   var nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
   var mid='';
   if(oferta){
@@ -116,8 +118,7 @@ function filaProducto(p, esUltima){
 }
 
 function tablaProductos(prods){
-  var mid=Math.ceil(prods.length/2);
-  var c1=prods.slice(0,mid), c2=prods.slice(mid);
+  var unaColumna = window.innerWidth < 600;
   function col(ps){
     if(ps.length===0) return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"></table>';
     return '<table style="width:100%;border-collapse:collapse;table-layout:fixed">'+
@@ -130,6 +131,11 @@ function tablaProductos(prods){
       ps.map(function(p,i){return filaProducto(p,i===ps.length-1);}).join('')+
       '</tbody></table>';
   }
+  if(unaColumna){
+    return col(prods);
+  }
+  var mid=Math.ceil(prods.length/2);
+  var c1=prods.slice(0,mid), c2=prods.slice(mid);
   return '<table style="width:100%;border-collapse:collapse"><tr>'+
     '<td style="vertical-align:top;width:50%;border-right:1px solid #000">'+col(c1)+'</td>'+
     '<td style="vertical-align:top;width:50%">'+col(c2)+'</td>'+
@@ -188,6 +194,8 @@ document.getElementById('search').addEventListener('input', function(e){
   render();
 });
 
+window.addEventListener('resize', render);
+
 onSnapshot(doc(db,'clinica','datos'), function(snap){
   document.getElementById('loading').style.display='none';
   if(snap.exists()){
@@ -205,4 +213,4 @@ onSnapshot(doc(db,'clinica','datos'), function(snap){
 });
 </script>
 </body>
-  </html>
+</html>

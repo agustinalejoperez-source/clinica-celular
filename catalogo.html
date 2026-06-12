@@ -119,14 +119,10 @@ function filaProducto(p, esUltima){
     fs=14;
     if(nombre.length>34) fs=12.5;
     nameCell='padding:9px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;line-height:1.25;word-break:break-word';
-  } else {
-    fs=11;
-    if(nombre.length>18) fs=10;
-    if(nombre.length>24) fs=9;
-    if(nombre.length>30) fs=8;
-    if(nombre.length>38) fs=7;
-    if(nombre.length>46) fs=6.5;
-    nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+   } else {
+    // Desktop: tamaño único para todos, los largos bajan a 2 líneas
+    fs=10;
+    nameCell='padding:8px 10px;'+bb+'font-family:Roboto Mono,monospace;font-size:'+fs+'px;line-height:1.3;word-break:break-word';
   }
   var mid='';
   if(oferta){

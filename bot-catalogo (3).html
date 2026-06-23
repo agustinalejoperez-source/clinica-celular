@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente — La Clínica del Celular</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #111;
+    color: #f0f0f0;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #c0392b;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-info p { margin: 0; }
+  .header-info .name { font-weight: 600; font-size: 14px; }
+  .header-info .status { font-size: 12px; color: #4caf50; }
+
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+  }
+
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.bot  { align-self: flex-start; align-items: flex-start; }
+
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .msg.user .bubble {
+    background: #c0392b;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg.bot .bubble {
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    color: #f0f0f0;
+    border-bottom-left-radius: 4px;
+  }
+
+  .product-card {
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  .product-card .pname {
+    font-weight: 600;
+    color: #f0f0f0;
+    margin-bottom: 4px;
+  }
+
+  .product-card .pmeta {
+    color: #aaa;
+    font-size: 12px;
+  }
+
+  .product-card .pprice {
+    color: #e74c3c;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+
+  .product-card .pstock {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .pstock.ok { color: #4caf50; }
+  .pstock.low { color: #ff9800; }
+  .pstock.none { color: #f44336; }
+
+  .wsp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .typing {
+    display: flex;
+    gap: 5px;
+    padding: 12px 14px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+
+  .typing span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #666;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); background: #c0392b; }
+  }
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .suggestion {
+    background: #1e1e1e;
+    border: 1px solid #c0392b44;
+    color: #e88;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .suggestion:hover { background: #2a1a1a; }
+
+  footer {
+    background: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  #input {
+    flex: 1;
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 24px;
+    padding: 10px 16px;
+    color: #f0f0f0;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #input:focus { border-color: #c0392b; }
+  #input::placeholder { color: #555; }
+
+  #send {
+    background: #c0392b;
+    border: none;
+    border-radius: 50%;
+    width: 42px; height: 42px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  #send:hover { background: #a93226; }
+  #send:disabled { background: #444; cursor: default; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="avatar">🔧</div>
+  <div class="header-info">
+    <p class="name">Asistente La Clínica del Celular</p>
+    <p class="status">● En línea</p>
+  </div>
+</header>
+
+<div id="chat"></div>
+
+<footer>
+  <input id="input" type="text" placeholder="Preguntá por un producto..." autocomplete="off" />
+  <button id="send">➤</button>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmx5IGM5lDDDDD_xrJ1Rmg8FLG3hRWjsE",
+  authDomain: "clinica-celular-f6827.firebaseapp.com",
+  projectId: "clinica-celular-f6827",
+  storageBucket: "clinica-celular-f6827.firebasestorage.app",
+  messagingSenderId: "641319344661",
+  appId: "1:641319344661:web:5bb06e704088f144b74c1c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const CLAUDE_API = "https://fancy-sky-b1eb.agustinalejoperez.workers.dev";
+const WSP_NUMBER = "5491127999050";
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+
+let productos = [];
+
+async function cargarProductos() {
+  try {
+    const snap = await getDoc(doc(db, "clinica", "datos"));
+    if (snap.exists()) {
+      productos = snap.data().productos || [];
+    }
+  } catch(e) {
+    console.error("Error cargando productos:", e);
+  }
+}
+
+function formatearProductos() {
+  return productos.map(p => {
+    const marco = p.marco ? "con marco" : "sin marco";
+    return `- ${p.nombre} | ${marco} | precio: $${p.precio?.toLocaleString('es-AR')} | stock: ${p.stock} unidades | categoría: ${p.categoria}`;
+  }).join("\n");
+}
+
+function addMsg(role, html) {
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = html;
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return bubble;
+}
+
+function showTyping() {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.id = "typing-indicator";
+  div.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing-indicator");
+  if (t) t.remove();
+}
+
+function buildWspLink(productos, consulta) {
+  const detalle = productos.map(p =>
+    `• ${p.nombre} (${p.marco ? 'con marco' : 'sin marco'}) — $${p.precio?.toLocaleString('es-AR')}`
+  ).join("\n");
+  const texto = `Hola! Me interesa:\n${detalle}\n\nConsulté por: ${consulta}`;
+  return `https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent(texto)}`;
+}
+
+function renderBotMessage(data, consultaOriginal) {
+  let html = `<div>${data.respuesta}</div>`;
+
+  if (data.productos && data.productos.length > 0) {
+    data.productos.forEach(p => {
+      const stockClass = p.stock > 2 ? "ok" : p.stock > 0 ? "low" : "none";
+      const stockLabel = p.stock > 2 ? `✓ ${p.stock} en stock` : p.stock > 0 ? `⚠ Solo ${p.stock} disponible` : "✗ Sin stock";
+      html += `
+        <div class="product-card">
+          <div class="pname">${p.nombre}</div>
+          <div class="pmeta">${p.categoria} · ${p.marco ? 'Con marco' : 'Sin marco'}</div>
+          <div class="pprice">$${p.precio?.toLocaleString('es-AR')}</div>
+          <div class="pstock ${stockClass}">${stockLabel}</div>
+        </div>`;
+    });
+
+    const wspUrl = buildWspLink(data.productos, consultaOriginal);
+    html += `<a class="wsp-btn" href="${wspUrl}" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.097.543 4.068 1.493 5.785L0 24l6.345-1.663A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.645-.52-5.148-1.424l-.369-.219-3.824 1.003 1.02-3.726-.24-.384A9.947 9.947 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Pedir por WhatsApp
+    </a>`;
+  }
+
+  if (data.sugerencias && data.sugerencias.length > 0) {
+    html += `<div class="suggestions">`;
+    data.sugerencias.forEach(s => {
+      html += `<span class="suggestion" onclick="document.getElementById('input').value='${s}'; document.getElementById('send').click()">${s}</span>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+async function enviar() {
+  const texto = input.value.trim();
+  if (!texto || sendBtn.disabled) return;
+
+  addMsg("user", texto);
+  input.value = "";
+  sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const catalogoTexto = formatearProductos();
+
+    const prompt = `Sos el asistente de ventas de "La Clínica del Celular", una tienda de repuestos y herramientas para reparación de celulares en Pilar, Argentina.
+
+El catálogo actual de productos es:
+${catalogoTexto}
+
+El cliente escribió: "${texto}"
+
+Tu tarea:
+1. Buscá en el catálogo los productos que coincidan con lo que pregunta el cliente (por nombre, modelo, categoría). Sé flexible con la ortografía y abreviaciones (ej: "a03s" = "A03S", "modulo" = "Módulo", "c/m" o "con marco" = marco:true).
+2. Respondé de forma amigable, breve y en español rioplatense (tuteo, nada de "usted").
+3. Si encontrás productos, incluilos en el array "productos" con sus datos exactos del catálogo.
+4. Si no encontrás nada, decíselo y sugerí alternativas similares.
+5. Agregá 2-3 sugerencias de consultas relacionadas en "sugerencias".
+
+Respondé SOLO con este JSON (sin texto extra, sin backticks):
+{
+  "respuesta": "texto de respuesta al cliente",
+  "productos": [
+    {
+      "nombre": "nombre exacto del producto",
+      "categoria": "categoría",
+      "marco": true o false,
+      "precio": número,
+      "stock": número
+    }
+  ],
+  "sugerencias": ["consulta sugerida 1", "consulta sugerida 2"]
+}`;
+
+    const res = await fetch(CLAUDE_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const rawText = data.content?.[0]?.text || data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const clean = rawText.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+
+    removeTyping();
+    const html = renderBotMessage(parsed, texto);
+    addMsg("bot", html);
+
+  } catch(e) {
+    removeTyping();
+    addMsg("bot", "Ups, hubo un error conectándome. Intentá de nuevo en un momento.");
+    console.error(e);
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+input.addEventListener("keydown", e => { if (e.key === "Enter") enviar(); });
+sendBtn.addEventListener("click", enviar);
+
+(async () => {
+  await cargarProductos();
+  addMsg("bot", `¡Hola! 👋 Soy el asistente de <strong>La Clínica del Celular</strong>.<br><br>Preguntame por cualquier repuesto o herramienta y te digo precio y stock al instante.
+    <div class="suggestions" style="margin-top:10px">
+      <span class="suggestion" onclick="document.getElementById('input').value='módulos Samsung disponibles'; document.getElementById('send').click()">📱 Módulos Samsung</span>
+      <span class="suggestion" onclick="document.getElementById('input').value='baterías en stock'; document.getElementById('send').click()">🔋 Baterías</span>
+      <span class="suggestion" onclick="document.getElementById('input').value='herramientas de apertura'; document.getElementById('send').click()">🔧 Herramientas</span>
+    </div>`);
+})();
+</script>
+</body>
+</html>

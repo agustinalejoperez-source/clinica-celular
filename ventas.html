@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ventas · La Clínica del Celular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@85,500;85,600;85,700;85,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fondo:#F5F6F8; --superficie:#FFFFFF; --tinta:#1B2733; --tinta2:#5B6B7A;
+  --borde:#E3E7EC; --verde:#0E6E5C; --verde-suave:#E4F1EE; --rojo:#B3372E; --rojo-suave:#F9E9E7;
+  --ambar:#B7791F; --ambar-suave:#F8F0DF; --azul:#2B6CB0; --azul-suave:#E6EEF7;
+  --gris-chip:#EEF1F4; --wa:#1FAF54; --radio:14px;
+  --sombra:0 1px 2px rgba(27,39,51,.06), 0 4px 14px rgba(27,39,51,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--fondo);color:var(--tinta);min-height:100vh;padding-bottom:60px}
+h1,h2,h3,.num{font-family:'Archivo',sans-serif;font-stretch:85%}
+.num{font-variant-numeric:tabular-nums}
+button{font-family:inherit;border:none;cursor:pointer;background:none}
+input,select{font-family:inherit;font-size:1rem;width:100%;padding:12px 14px;border:1.5px solid var(--borde);border-radius:10px;background:#FBFCFD;color:var(--tinta)}
+input:focus,select:focus{outline:none;border-color:var(--verde);background:#fff}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--tinta2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+:focus-visible{outline:2px solid var(--verde);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+#loginScreen{position:fixed;inset:0;background:var(--fondo);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--superficie);border-radius:18px;box-shadow:var(--sombra);padding:32px 26px;width:100%;max-width:400px;border-top:5px solid var(--verde)}
+.login-card h1{font-size:1.35rem;font-weight:800}
+.login-card .sub{color:var(--tinta2);font-size:.85rem;margin-top:4px}
+.login-err{display:none;background:var(--rojo-suave);color:var(--rojo);padding:10px 12px;border-radius:10px;font-size:.85rem;margin-top:14px;font-weight:500}
+
+header{background:var(--superficie);border-bottom:1px solid var(--borde);position:sticky;top:0;z-index:50}
+.head-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.brand{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.02rem}
+.brand small{display:block;font-weight:600;font-size:.68rem;color:var(--verde);letter-spacing:.14em;text-transform:uppercase}
+#btnSalir{font-size:.78rem;font-weight:600;color:var(--tinta2);padding:8px 12px;border:1.5px solid var(--borde);border-radius:99px}
+.tabs{display:flex;gap:6px;padding:0 12px}
+.tab{flex:1;padding:11px 4px;font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:.95rem;color:var(--tinta2);border-bottom:3px solid transparent}
+.tab.activa{color:var(--verde);border-color:var(--verde)}
+main{max-width:640px;margin:0 auto;padding:16px 14px}
+.seccion{display:none}.seccion.activa{display:block}
+
+/* navegación de día / semana */
+.nav-fecha{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.nav-fecha button{flex:0 0 46px;height:46px;border:1.5px solid var(--borde);border-radius:11px;background:var(--superficie);font-size:1.1rem;color:var(--tinta2);font-weight:700}
+.nav-fecha .titulo{flex:1;text-align:center;background:var(--superficie);border:1.5px solid var(--borde);border-radius:11px;padding:10px 6px;font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:.95rem;position:relative}
+.nav-fecha .titulo input{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.hoy-tag{font-size:.62rem;font-weight:700;color:var(--verde);letter-spacing:.1em;display:block;text-transform:uppercase}
+
+/* carga rápida */
+.carga{background:var(--superficie);border-radius:var(--radio);box-shadow:var(--sombra);border-top:6px solid var(--verde);padding:14px 16px 16px;margin-bottom:14px}
+.carga .rotulo{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.carga label{margin-top:10px}
+.fila-3{display:flex;gap:8px}
+.fila-3>div{flex:1}
+.cats{display:flex;gap:6px;margin-top:10px}
+.cat-chip{flex:1;padding:8px 2px;border-radius:9px;font-size:.72rem;font-weight:700;background:var(--gris-chip);color:var(--tinta2);text-align:center}
+.cat-chip.activa{background:var(--tinta);color:#fff}
+.gan-linea{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700;font-size:.85rem;color:var(--tinta2)}
+.gan-linea .num{font-size:1.05rem;color:var(--verde)}
+.btn{padding:13px 8px;border-radius:11px;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s;width:100%}
+.btn:active{transform:scale(.97)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-blanco{background:var(--superficie);color:var(--tinta);border:1.5px solid var(--borde)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-rojo-s{background:var(--rojo-suave);color:var(--rojo)}
+
+/* planilla del día */
+.planilla{background:var(--superficie);border-radius:var(--radio);box-shadow:var(--sombra);padding:6px 16px 14px}
+.renglon{display:flex;align-items:baseline;gap:8px;padding:10px 0;border-bottom:1px solid #F0F2F5;font-size:.88rem}
+.renglon .concepto{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52%}
+.renglon .guia{flex:1;border-bottom:2px dotted #D5DBE1;transform:translateY(-4px)}
+.renglon .monto{font-family:'Archivo';font-stretch:85%;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.renglon .sub-r{display:block;font-size:.7rem;color:var(--tinta2);font-weight:500}
+.verde-t{color:var(--verde)} .rojo-t{color:var(--rojo)} .ambar-t{color:var(--ambar)}
+.fila-venta{cursor:pointer}
+.fila-venta:active{background:#F8F9FB}
+.tot-dia{margin-top:6px;border-top:2px solid var(--tinta);padding-top:4px}
+.tot-dia .renglon{border-bottom:none;padding:6px 0;font-weight:700}
+.cat-des{margin-top:8px;background:#F8F9FB;border-radius:10px;padding:2px 12px}
+.cat-des .renglon{border-color:#E9ECF0;font-size:.8rem}
+.cat-des .renglon:last-child{border-bottom:none}
+.vacio{text-align:center;color:var(--tinta2);padding:36px 20px;font-size:.9rem}
+.vacio strong{display:block;font-family:'Archivo';font-stretch:85%;font-size:1.05rem;color:var(--tinta);margin-bottom:4px}
+.plegable summary{list-style:none;cursor:pointer;padding:10px 0 2px;font-size:.8rem;font-weight:700;color:var(--verde);display:flex;align-items:center;gap:4px}
+.plegable summary::-webkit-details-marker{display:none}
+.plegable summary::after{content:'▾';transition:transform .15s}
+.plegable[open] summary::after{transform:rotate(180deg)}
+
+/* reposición */
+.chips-resumen{display:flex;gap:8px;margin-bottom:12px}
+.chip-res{flex:1;background:var(--superficie);border-radius:12px;box-shadow:var(--sombra);padding:12px 8px;text-align:center}
+.mini-rotulo{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2)}
+.mini-monto{font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:1.05rem;font-variant-numeric:tabular-nums;margin-top:2px}
+.total-llevar{background:var(--tinta);color:#fff;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.total-llevar .rotulo{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.7;max-width:55%}
+.total-llevar .num{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.5rem}
+.item-rep{display:flex;align-items:center;gap:12px;background:var(--superficie);border-radius:12px;box-shadow:var(--sombra);padding:13px 14px;margin-bottom:8px}
+.item-rep .check{flex:0 0 26px;height:26px;border:2px solid var(--borde);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:#fff}
+.item-rep.comprado{opacity:.55}
+.item-rep.comprado .check{background:var(--verde);border-color:var(--verde)}
+.item-rep.comprado .nombre{text-decoration:line-through}
+.item-rep .datos{flex:1;min-width:0}
+.item-rep .nombre{font-weight:700;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-rep .det{font-size:.75rem;color:var(--tinta2);margin-top:1px}
+.item-rep .costo{font-family:'Archivo';font-stretch:85%;font-weight:700;font-variant-numeric:tabular-nums;font-size:.95rem}
+.cant-badge{flex:0 0 auto;background:var(--verde-suave);color:var(--verde);font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:.95rem;padding:6px 11px;border-radius:9px;font-variant-numeric:tabular-nums}
+
+#velo{position:fixed;inset:0;background:rgba(27,39,51,.45);z-index:90;display:none;opacity:0;transition:opacity .2s}
+#velo.abierto{display:block;opacity:1}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--superficie);border-radius:20px 20px 0 0;z-index:100;transform:translateY(105%);transition:transform .25s cubic-bezier(.3,.9,.4,1);max-height:88vh;overflow-y:auto;padding:10px 20px calc(24px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+#sheet.abierto{transform:translateY(0)}
+.sheet-asa{width:42px;height:5px;background:var(--borde);border-radius:99px;margin:6px auto 14px}
+.sheet-titulo{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.25rem}
+.sheet-sub{font-size:.83rem;color:var(--tinta2);margin-top:3px}
+.sheet-botones{display:flex;gap:10px;margin-top:22px}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--tinta);color:#fff;padding:12px 20px;border-radius:99px;font-size:.85rem;font-weight:600;opacity:0;transition:all .25s;z-index:150;pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+#bannerError{display:none;background:var(--rojo-suave);color:var(--rojo);padding:14px 16px;border-radius:12px;font-size:.85rem;font-weight:500;margin-bottom:14px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>PLANILLA DE VENTAS</h1>
+    <div class="sub">La Clínica del Celular. Entrá con el mismo usuario del inventario y la gestión.</div>
+    <label for="logEmail">Email</label>
+    <input type="email" id="logEmail" autocomplete="username" placeholder="tu@email.com">
+    <label for="logPass">Contraseña</label>
+    <input type="password" id="logPass" autocomplete="current-password" placeholder="••••••••">
+    <div class="login-err" id="logErr"></div>
+    <div class="sheet-botones"><button class="btn btn-verde" id="btnEntrar">Entrar</button></div>
+  </div>
+</div>
+
+<header>
+  <div class="head-row">
+    <div class="brand">VENTAS<small>La Clínica del Celular</small></div>
+    <button id="btnSalir">Salir</button>
+  </div>
+  <nav class="tabs">
+    <button class="tab activa" data-tab="dia">Planilla del día</button>
+    <button class="tab" data-tab="repo">Reposición semanal</button>
+  </nav>
+</header>
+
+<main>
+  <div id="bannerError"></div>
+
+  <!-- ===== PLANILLA DEL DÍA ===== -->
+  <section class="seccion activa" id="sec-dia">
+    <div class="nav-fecha">
+      <button onclick="moverDia(-1)" aria-label="Día anterior">‹</button>
+      <div class="titulo"><span id="fechaTitulo"></span><input type="date" id="fechaInput" onchange="cambiarFecha(this.value)"></div>
+      <button onclick="moverDia(1)" aria-label="Día siguiente">›</button>
+    </div>
+
+    <div class="carga">
+      <div class="rotulo">Cargar venta</div>
+      <input id="cProducto" list="dlProductos" placeholder="Producto · ej: Módulo A32" oninput="autoCat()">
+      <datalist id="dlProductos"></datalist>
+      <div class="cats" id="catChips">
+        <button class="cat-chip" data-cat="Módulo" onclick="setCat('Módulo')">Módulo</button>
+        <button class="cat-chip" data-cat="Batería" onclick="setCat('Batería')">Batería</button>
+        <button class="cat-chip" data-cat="Placa" onclick="setCat('Placa')">Placa</button>
+        <button class="cat-chip" data-cat="Otro" onclick="setCat('Otro')">Otro</button>
+      </div>
+      <div class="fila-3">
+        <div><label>Cant.</label><input type="text" inputmode="numeric" id="cCant" value="1"></div>
+        <div><label>Total venta</label><input type="text" inputmode="numeric" id="cTotal" placeholder="0" oninput="previewGan()"></div>
+        <div><label>Costo total</label><input type="text" inputmode="numeric" id="cCosto" placeholder="0" oninput="previewGan()"></div>
+      </div>
+      <div class="gan-linea"><span>Ganancia de esta venta</span><span class="num" id="cGan">$ 0</span></div>
+      <div style="margin-top:12px"><button class="btn btn-verde" onclick="agregarVenta()">＋ Agregar a la planilla</button></div>
+    </div>
+
+    <div class="planilla" id="planillaDia"></div>
+  </section>
+
+  <!-- ===== REPOSICIÓN SEMANAL ===== -->
+  <section class="seccion" id="sec-repo">
+    <div class="nav-fecha">
+      <button onclick="moverSemana(-1)" aria-label="Semana anterior">‹</button>
+      <div class="titulo" style="padding:10px 6px"><span id="semanaTitulo"></span></div>
+      <button onclick="moverSemana(1)" aria-label="Semana siguiente">›</button>
+    </div>
+    <div class="chips-resumen">
+      <div class="chip-res"><div class="mini-rotulo">Vendido</div><div class="mini-monto num" id="rVendido">$ 0</div></div>
+      <div class="chip-res"><div class="mini-rotulo">Costo</div><div class="mini-monto ambar-t num" id="rCosto">$ 0</div></div>
+      <div class="chip-res"><div class="mini-rotulo">Ganancia</div><div class="mini-monto verde-t num" id="rGan">$ 0</div></div>
+    </div>
+    <div class="total-llevar"><span class="rotulo">Plata a llevar al proveedor (falta comprar)</span><span class="num" id="rLlevar">$ 0</span></div>
+    <div style="margin-bottom:12px"><button class="btn btn-wa" onclick="enviarListaWA()">Mandarme la lista por WhatsApp</button></div>
+    <div id="listaRepo"></div>
+  </section>
+</main>
+
+<div id="velo" onclick="cerrarSheet()"></div>
+<div id="sheet"><div class="sheet-asa"></div><div id="sheetContenido"></div></div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmx5IGM5lDDDDD_xrJ1Rmg8FLG3hRWjsE",
+  authDomain: "clinica-celular-f6827.firebaseapp.com",
+  projectId: "clinica-celular-f6827",
+  storageBucket: "clinica-celular-f6827.firebasestorage.app",
+  messagingSenderId: "641319344661",
+  appId: "1:641319344661:web:5bb06e704088f1a3e1571e"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+try{ enableIndexedDbPersistence(db).catch(function(){}); }catch(e){}
+
+const DOC_REF = doc(db,'gestion','ventas');
+const WA_NUM = '5491127999050';
+
+let DB = null;
+let fechaSel = hoyISO();
+let lunesSel = lunesDe(hoyISO());
+let catSel = 'Otro';
+
+function baseDB(){ return { ventas: [], comprados: {} }; }
+// ventas: {id, fecha, producto, cat, cantidad, total, costo}
+// comprados: { '2026-08-17': ['módulo a32', ...] }  (clave = lunes de la semana)
+
+// ============ utilidades ============
+const $ = function(id){ return document.getElementById(id); };
+function fmt(n){ return '$ ' + Math.round(n||0).toLocaleString('es-AR'); }
+function hoyISO(){ return new Date().toISOString().slice(0,10); }
+function fFecha(iso){ if(!iso) return ''; const p=iso.slice(0,10).split('-'); return p[2]+'/'+p[1]; }
+function fFechaLarga(iso){
+  const D=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d = new Date(iso+'T12:00:00');
+  return D[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()];
+}
+function nid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function num(v){ const n=parseFloat(String(v).replace(/\./g,'').replace(',','.')); return isNaN(n)?0:n; }
+function lunesDe(iso){
+  const d = new Date(iso+'T12:00:00');
+  d.setDate(d.getDate() - ((d.getDay()+6)%7));
+  return d.toISOString().slice(0,10);
+}
+function sumarDias(iso, n){
+  const d = new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+let toastT;
+function toast(msj){ const t=$('toast'); t.textContent=msj; t.classList.add('visible'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('visible');},2600); }
+
+// ============ guardado ============
+async function guardar(){
+  if(!DB) return;
+  try{ await setDoc(DOC_REF, DB); }
+  catch(e){
+    console.error(e);
+    if(String(e.code).includes('permission')){
+      const b=$('bannerError'); b.style.display='block';
+      b.innerHTML='<strong>No se pudo guardar.</strong> Parece un tema de permisos en Firebase. Escribile a Claude "no me deja guardar en ventas" y lo resolvemos.';
+    } else toast('No se pudo guardar. Revisá tu conexión.');
+  }
+}
+
+// ============ auth ============
+$('btnEntrar').addEventListener('click', entrar);
+$('logPass').addEventListener('keydown', function(e){ if(e.key==='Enter') entrar(); });
+async function entrar(){
+  const err=$('logErr'); err.style.display='none';
+  try{
+    await setPersistence(auth, browserLocalPersistence);
+    await signInWithEmailAndPassword(auth, $('logEmail').value.trim(), $('logPass').value);
+  }catch(e){
+    err.style.display='block';
+    err.textContent='No se pudo entrar. Revisá el email y la contraseña (los mismos de siempre).';
+  }
+}
+$('btnSalir').addEventListener('click', function(){ if(confirm('¿Cerrar sesión?')) signOut(auth); });
+
+let escuchando=false;
+onAuthStateChanged(auth, function(user){
+  if(user){
+    $('loginScreen').style.display='none';
+    if(!escuchando){
+      escuchando=true;
+      onSnapshot(DOC_REF, function(snap){
+        if(snap.exists()) DB = snap.data();
+        else { DB = baseDB(); guardar(); }
+        if(!DB.ventas) DB.ventas=[];
+        if(!DB.comprados) DB.comprados={};
+        render();
+      }, function(e){
+        console.error(e);
+        if(String(e.code).includes('permission')){
+          DB = DB || baseDB();
+          const b=$('bannerError'); b.style.display='block';
+          b.innerHTML='<strong>Sin permiso para leer los datos.</strong> Escribile a Claude "no me deja entrar a ventas" y lo resolvemos.';
+          render();
+        }
+      });
+    }
+  } else $('loginScreen').style.display='flex';
+});
+
+// ============ tabs ============
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('activa', x===t);});
+    $('sec-dia').classList.toggle('activa', t.dataset.tab==='dia');
+    $('sec-repo').classList.toggle('activa', t.dataset.tab==='repo');
+  });
+});
+
+// ============ sheet ============
+function abrirSheet(html){ $('sheetContenido').innerHTML=html; $('velo').classList.add('abierto'); $('sheet').classList.add('abierto'); }
+window.cerrarSheet = function(){ $('velo').classList.remove('abierto'); $('sheet').classList.remove('abierto'); };
+
+// ============ navegación día / semana ============
+window.moverDia = function(n){ fechaSel = sumarDias(fechaSel, n); render(); };
+window.cambiarFecha = function(v){ if(v){ fechaSel=v; render(); } };
+window.moverSemana = function(n){ lunesSel = sumarDias(lunesSel, n*7); render(); };
+
+// ============ categoría automática ============
+window.setCat = function(c){ catSel=c; pintarCats(); };
+function pintarCats(){
+  document.querySelectorAll('.cat-chip').forEach(function(ch){ ch.classList.toggle('activa', ch.dataset.cat===catSel); });
+}
+window.autoCat = function(){
+  const p = $('cProducto').value.toLowerCase();
+  if(/mod|pant|disp/.test(p)) catSel='Módulo';
+  else if(/bat/.test(p)) catSel='Batería';
+  else if(/placa|pin|carga|flex/.test(p)) catSel='Placa';
+  else catSel='Otro';
+  pintarCats();
+};
+window.previewGan = function(){
+  const g = num($('cTotal').value) - num($('cCosto').value);
+  const el=$('cGan'); el.textContent=fmt(g);
+  el.style.color = g>=0 ? 'var(--verde)' : 'var(--rojo)';
+};
+
+// ============ cargar venta ============
+window.agregarVenta = function(){
+  const producto = $('cProducto').value.trim();
+  const cantidad = Math.max(1, Math.round(num($('cCant').value)||1));
+  const total = num($('cTotal').value), costo = num($('cCosto').value);
+  if(!producto){ toast('Escribí el producto'); return; }
+  if(total<=0){ toast('Poné el total de la venta'); return; }
+  DB.ventas.push({id:nid(), fecha:fechaSel, producto:producto, cat:catSel, cantidad:cantidad, total:total, costo:costo});
+  guardar(); render();
+  $('cProducto').value=''; $('cCant').value='1'; $('cTotal').value=''; $('cCosto').value='';
+  $('cGan').textContent='$ 0'; catSel='Otro'; pintarCats();
+  $('cProducto').focus();
+  toast(producto+' agregado ✓');
+};
+
+// ============ editar / borrar venta ============
+window.abrirVenta = function(id){
+  const v = DB.ventas.find(function(x){return x.id===id;}); if(!v) return;
+  abrirSheet(
+    '<div class="sheet-titulo">Editar venta</div>'+
+    '<div class="sheet-sub">'+fFechaLarga(v.fecha)+'</div>'+
+    '<label>Producto</label><input id="eProducto" value="'+esc(v.producto)+'">'+
+    '<div class="fila-3">'+
+    '<div><label>Cant.</label><input type="text" inputmode="numeric" id="eCant" value="'+v.cantidad+'"></div>'+
+    '<div><label>Total venta</label><input type="text" inputmode="numeric" id="eTotal" value="'+(v.total||'')+'"></div>'+
+    '<div><label>Costo total</label><input type="text" inputmode="numeric" id="eCosto" value="'+(v.costo||'')+'"></div></div>'+
+    '<label>Fecha</label><input type="date" id="eFecha" value="'+v.fecha+'">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confEditarVenta(\''+id+'\')">Guardar</button></div>'+
+    '<div class="sheet-botones"><button class="btn btn-rojo-s" onclick="borrarVenta(\''+id+'\')">🗑 Borrar esta venta</button></div>'
+  );
+};
+window.confEditarVenta = function(id){
+  const v = DB.ventas.find(function(x){return x.id===id;}); if(!v) return;
+  const producto = $('eProducto').value.trim();
+  if(!producto){ toast('El producto no puede quedar vacío'); return; }
+  v.producto = producto;
+  v.cantidad = Math.max(1, Math.round(num($('eCant').value)||1));
+  v.total = num($('eTotal').value);
+  v.costo = num($('eCosto').value);
+  v.fecha = $('eFecha').value || v.fecha;
+  guardar(); render(); cerrarSheet(); toast('Venta actualizada');
+};
+window.borrarVenta = function(id){
+  const v = DB.ventas.find(function(x){return x.id===id;}); if(!v) return;
+  if(!confirm('¿Borrar "'+v.producto+'" ('+fmt(v.total)+') de la planilla?')) return;
+  DB.ventas = DB.ventas.filter(function(x){return x.id!==id;});
+  guardar(); render(); cerrarSheet(); toast('Venta borrada');
+};
+
+// ============ comprado ============
+window.toggleComprado = function(clave){
+  const lista = DB.comprados[lunesSel] || [];
+  const i = lista.indexOf(clave);
+  if(i>=0) lista.splice(i,1); else lista.push(clave);
+  DB.comprados[lunesSel] = lista;
+  guardar(); render();
+};
+
+// ============ whatsapp ============
+window.enviarListaWA = function(){
+  const info = datosSemana();
+  const pendientes = info.items.filter(function(it){return !it.comprado;});
+  if(!pendientes.length){ toast('No hay nada pendiente de comprar esta semana'); return; }
+  let msj = '🛒 *Compras La Clínica del Celular*\n'+
+    'Semana del lunes '+fFecha(lunesSel)+' al sábado '+fFecha(sumarDias(lunesSel,5))+'\n\n';
+  pendientes.forEach(function(it){
+    msj += '• '+it.cantidad+'× '+it.producto+' — '+fmt(it.costo)+'\n';
+  });
+  msj += '\n*Total a llevar: '+fmt(info.llevar)+'*';
+  window.open('https://wa.me/'+WA_NUM+'?text='+encodeURIComponent(msj), '_blank');
+};
+
+// ============ datos de la semana ============
+function datosSemana(){
+  const desde = lunesSel, hasta = sumarDias(lunesSel, 6);
+  const ventas = DB.ventas.filter(function(v){ return v.fecha>=desde && v.fecha<=hasta; });
+  const compradosLista = DB.comprados[lunesSel] || [];
+  const mapa = {};
+  let vendido=0, costo=0;
+  ventas.forEach(function(v){
+    vendido += v.total; costo += v.costo;
+    const clave = v.producto.trim().toLowerCase();
+    if(!mapa[clave]) mapa[clave] = {producto:v.producto, cantidad:0, costo:0, clave:clave};
+    mapa[clave].cantidad += v.cantidad;
+    mapa[clave].costo += v.costo;
+  });
+  const items = Object.values(mapa).sort(function(a,b){return b.cantidad-a.cantidad;});
+  items.forEach(function(it){ it.comprado = compradosLista.indexOf(it.clave)>=0; });
+  const llevar = items.filter(function(it){return !it.comprado;}).reduce(function(a,it){return a+it.costo;},0);
+  return { items:items, vendido:vendido, costo:costo, ganancia:vendido-costo, llevar:llevar };
+}
+
+// ============ render ============
+window.render = function(){
+  if(!DB) return;
+
+  // --- datalist de productos usados antes ---
+  const nombres = {};
+  DB.ventas.forEach(function(v){ nombres[v.producto.trim().toLowerCase()] = v.producto; });
+  $('dlProductos').innerHTML = Object.values(nombres).map(function(n){return '<option value="'+esc(n)+'">';}).join('');
+
+  // --- día ---
+  const esHoy = fechaSel===hoyISO();
+  $('fechaTitulo').innerHTML = (esHoy?'<span class="hoy-tag">Hoy</span>':'') + fFechaLarga(fechaSel);
+  $('fechaInput').value = fechaSel;
+  const delDia = DB.ventas.filter(function(v){return v.fecha===fechaSel;});
+  if(!delDia.length){
+    $('planillaDia').innerHTML = '<div class="vacio"><strong>Sin ventas cargadas este día</strong>Cargalas arriba, una por una, y se van sumando acá.</div>';
+  } else {
+    let tv=0, tc=0;
+    const cats = {};
+    const filas = delDia.map(function(v){
+      tv+=v.total; tc+=v.costo;
+      if(!cats[v.cat]) cats[v.cat]={venta:0,costo:0};
+      cats[v.cat].venta+=v.total; cats[v.cat].costo+=v.costo;
+      return '<div class="renglon fila-venta" onclick="abrirVenta(\''+v.id+'\')">'+
+        '<span class="concepto">'+(v.cantidad>1?('<strong>'+v.cantidad+'×</strong> '):'')+esc(v.producto)+
+        '<span class="sub-r">'+esc(v.cat)+' · costo '+fmt(v.costo)+' · tocá para editar</span></span>'+
+        '<span class="guia"></span>'+
+        '<span class="monto">'+fmt(v.total)+'<span class="sub-r verde-t" style="text-align:right">+'+fmt(v.total-v.costo).slice(2)+'</span></span></div>';
+    }).join('');
+    const catHTML = Object.keys(cats).map(function(c){
+      return '<div class="renglon"><span class="concepto">'+esc(c)+'</span><span class="guia"></span><span class="monto">'+fmt(cats[c].venta)+' <span style="color:var(--verde)">(+'+fmt(cats[c].venta-cats[c].costo).slice(2)+')</span></span></div>';
+    }).join('');
+    $('planillaDia').innerHTML = filas +
+      '<div class="tot-dia">'+
+      '<div class="renglon"><span class="concepto">Total vendido</span><span class="guia"></span><span class="monto">'+fmt(tv)+'</span></div>'+
+      '<div class="renglon"><span class="concepto">Total costo</span><span class="guia"></span><span class="monto ambar-t">'+fmt(tc)+'</span></div>'+
+      '<div class="renglon"><span class="concepto">Total ganancia</span><span class="guia"></span><span class="monto verde-t">'+fmt(tv-tc)+'</span></div>'+
+      '</div>'+
+      '<details class="plegable"><summary>Por categoría (tus bolsitas)</summary><div class="cat-des">'+catHTML+'</div></details>';
+  }
+
+  // --- semana ---
+  $('semanaTitulo').textContent = 'Lun '+fFecha(lunesSel)+' – Sáb '+fFecha(sumarDias(lunesSel,5));
+  const info = datosSemana();
+  $('rVendido').textContent = fmt(info.vendido);
+  $('rCosto').textContent = fmt(info.costo);
+  $('rGan').textContent = fmt(info.ganancia);
+  $('rLlevar').textContent = fmt(info.llevar);
+  $('listaRepo').innerHTML = info.items.length ? info.items.map(function(it){
+    return '<div class="item-rep'+(it.comprado?' comprado':'')+'" onclick="toggleComprado(\''+esc(it.clave).replace(/'/g,"\\'")+'\')">'+
+      '<div class="check">'+(it.comprado?'✓':'')+'</div>'+
+      '<span class="cant-badge">'+it.cantidad+'×</span>'+
+      '<div class="datos"><div class="nombre">'+esc(it.producto)+'</div>'+
+      '<div class="det">'+(it.comprado?'Ya lo compraste ✓ · tocá para destildar':'Tocá cuando lo compres')+'</div></div>'+
+      '<div class="costo">'+fmt(it.costo)+'</div></div>';
+  }).join('') :
+  '<div class="vacio"><strong>Sin ventas esta semana</strong>Cuando cargues ventas en la planilla, acá aparece qué reponer.</div>';
+};
+</script>
+</body>
+</html>

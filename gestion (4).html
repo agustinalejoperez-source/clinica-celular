@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gestión · La Clínica del Celular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@85,500;85,600;85,700;85,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fondo:#F5F6F8; --superficie:#FFFFFF; --tinta:#1B2733; --tinta2:#5B6B7A;
+  --borde:#E3E7EC; --verde:#0E6E5C; --verde-suave:#E4F1EE; --rojo:#B3372E; --rojo-suave:#F9E9E7;
+  --ambar:#B7791F; --ambar-suave:#F8F0DF; --azul:#2B6CB0; --azul-suave:#E6EEF7;
+  --gris-chip:#EEF1F4; --wa:#1FAF54; --radio:14px;
+  --sombra:0 1px 2px rgba(27,39,51,.06), 0 4px 14px rgba(27,39,51,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--fondo);color:var(--tinta);min-height:100vh;padding-bottom:110px}
+h1,h2,h3,.num,.display{font-family:'Archivo',sans-serif;font-stretch:85%}
+.num{font-variant-numeric:tabular-nums}
+button{font-family:inherit;border:none;cursor:pointer;background:none}
+input,select,textarea{font-family:inherit;font-size:1rem;width:100%;padding:12px 14px;border:1.5px solid var(--borde);border-radius:10px;background:#FBFCFD;color:var(--tinta)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--verde);background:#fff}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--tinta2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+:focus-visible{outline:2px solid var(--verde);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+/* ---------- LOGIN ---------- */
+#loginScreen{position:fixed;inset:0;background:var(--fondo);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--superficie);border-radius:18px;box-shadow:var(--sombra);padding:32px 26px;width:100%;max-width:400px;border-top:5px solid var(--verde)}
+.login-card h1{font-size:1.35rem;font-weight:800;letter-spacing:.01em}
+.login-card .sub{color:var(--tinta2);font-size:.85rem;margin-top:4px}
+.login-err{display:none;background:var(--rojo-suave);color:var(--rojo);padding:10px 12px;border-radius:10px;font-size:.85rem;margin-top:14px;font-weight:500}
+
+/* ---------- HEADER + TABS ---------- */
+header{background:var(--superficie);border-bottom:1px solid var(--borde);position:sticky;top:0;z-index:50}
+.head-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.brand{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.02rem;letter-spacing:.02em}
+.brand small{display:block;font-weight:600;font-size:.68rem;color:var(--verde);letter-spacing:.14em;text-transform:uppercase}
+#btnSalir{font-size:.78rem;font-weight:600;color:var(--tinta2);padding:8px 12px;border:1.5px solid var(--borde);border-radius:99px}
+.tabs{display:flex;gap:6px;padding:0 12px}
+.tab{flex:1;padding:11px 4px;font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:.95rem;color:var(--tinta2);border-bottom:3px solid transparent;letter-spacing:.02em}
+.tab.activa{color:var(--verde);border-color:var(--verde)}
+
+main{max-width:640px;margin:0 auto;padding:16px 14px}
+.seccion{display:none}.seccion.activa{display:block}
+
+/* ---------- PLANILLA DE CAJA (elemento firma) ---------- */
+.planilla{background:var(--superficie);border-radius:var(--radio);box-shadow:var(--sombra);border-top:6px solid var(--verde);padding:18px 18px 14px;position:relative}
+.planilla .rotulo{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta2)}
+.caja-monto{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:2.35rem;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:2px}
+.caja-grid{display:flex;gap:18px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--borde)}
+.caja-grid > div{flex:1}
+.mini-rotulo{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta2)}
+.mini-monto{font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:1.15rem;font-variant-numeric:tabular-nums;margin-top:2px}
+.verde-t{color:var(--verde)} .rojo-t{color:var(--rojo)} .ambar-t{color:var(--ambar)}
+.caja-botones{display:flex;gap:8px;margin-top:16px}
+.btn{flex:1;padding:12px 8px;border-radius:11px;font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-blanco{background:var(--superficie);color:var(--tinta);border:1.5px solid var(--borde)}
+.btn-rojo-s{background:var(--rojo-suave);color:var(--rojo)}
+.btn-verde-s{background:var(--verde-suave);color:var(--verde)}
+
+/* renglones estilo libreta con puntos guía */
+.renglon{display:flex;align-items:baseline;gap:8px;padding:9px 0;border-bottom:1px solid #F0F2F5;font-size:.88rem}
+.renglon .concepto{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+.renglon .guia{flex:1;border-bottom:2px dotted #D5DBE1;transform:translateY(-4px)}
+.renglon .monto{font-family:'Archivo';font-stretch:85%;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.renglon .fecha-r{display:block;font-size:.7rem;color:var(--tinta2);font-weight:500}
+
+.plegable{margin-top:6px}
+.plegable summary{list-style:none;cursor:pointer;padding:10px 0 2px;font-size:.8rem;font-weight:700;color:var(--verde);display:flex;align-items:center;gap:4px}
+.plegable summary::-webkit-details-marker{display:none}
+.plegable summary::after{content:'▾';transition:transform .15s}
+.plegable[open] summary::after{transform:rotate(180deg)}
+
+/* ---------- SEGMENTED ---------- */
+.segmentos{display:flex;background:var(--gris-chip);border-radius:11px;padding:4px;margin:18px 0 12px;gap:4px}
+.seg{flex:1;padding:9px 4px;border-radius:8px;font-size:.8rem;font-weight:700;color:var(--tinta2)}
+.seg.activa{background:var(--superficie);color:var(--tinta);box-shadow:0 1px 3px rgba(27,39,51,.12)}
+
+/* ---------- TARJETAS ---------- */
+.tarjeta{background:var(--superficie);border-radius:var(--radio);box-shadow:var(--sombra);padding:16px;margin-bottom:12px}
+.t-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.t-titulo{font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:1.05rem}
+.t-sub{font-size:.78rem;color:var(--tinta2);margin-top:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:5px 10px;border-radius:99px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
+.chip-verde{background:var(--verde-suave);color:var(--verde)}
+.chip-ambar{background:var(--ambar-suave);color:var(--ambar)}
+.chip-gris{background:var(--gris-chip);color:var(--tinta2)}
+.chip-rojo{background:var(--rojo-suave);color:var(--rojo)}
+.chip-azul{background:var(--azul-suave);color:var(--azul)}
+.datos-fila{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.dato{flex:1;min-width:88px;background:#F8F9FB;border-radius:10px;padding:8px 10px}
+.dato .mini-rotulo{font-size:.6rem}
+.dato .mini-monto{font-size:.98rem}
+.t-acciones{display:flex;gap:8px;margin-top:14px}
+.t-acciones .btn{padding:10px 6px;font-size:.8rem}
+.btn-menu{flex:0 0 44px;border:1.5px solid var(--borde);border-radius:11px;font-size:1.2rem;color:var(--tinta2);font-weight:700}
+.vacio{text-align:center;color:var(--tinta2);padding:40px 20px;font-size:.9rem}
+.vacio strong{display:block;font-family:'Archivo';font-stretch:85%;font-size:1.05rem;color:var(--tinta);margin-bottom:4px}
+
+/* resumen gremio */
+.chips-resumen{display:flex;gap:8px;margin-bottom:4px}
+.chip-res{flex:1;background:var(--superficie);border-radius:12px;box-shadow:var(--sombra);padding:12px 10px;text-align:center}
+.filtros{display:flex;gap:8px;margin:14px 0 12px}
+.filtros select{padding:10px 12px;font-size:.85rem;border-radius:10px}
+
+/* ---------- FAB ---------- */
+.fab{position:fixed;bottom:22px;right:18px;left:18px;max-width:612px;margin:0 auto;background:var(--tinta);color:#fff;padding:16px;border-radius:14px;font-family:'Archivo';font-stretch:85%;font-weight:700;font-size:1rem;letter-spacing:.03em;box-shadow:0 6px 20px rgba(27,39,51,.3);display:none;z-index:40}
+.fab.visible{display:block}
+.fab:active{transform:scale(.98)}
+
+/* ---------- SHEET (modal) ---------- */
+#velo{position:fixed;inset:0;background:rgba(27,39,51,.45);z-index:90;display:none;opacity:0;transition:opacity .2s}
+#velo.abierto{display:block;opacity:1}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--superficie);border-radius:20px 20px 0 0;z-index:100;transform:translateY(105%);transition:transform .25s cubic-bezier(.3,.9,.4,1);max-height:88vh;overflow-y:auto;padding:10px 20px calc(24px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+#sheet.abierto{transform:translateY(0)}
+.sheet-asa{width:42px;height:5px;background:var(--borde);border-radius:99px;margin:6px auto 14px}
+.sheet-titulo{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.25rem}
+.sheet-sub{font-size:.83rem;color:var(--tinta2);margin-top:3px}
+.fila-2{display:flex;gap:10px}.fila-2>div{flex:1}
+.gan-preview{margin-top:16px;background:var(--verde-suave);border-radius:11px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:.9rem;color:var(--verde)}
+.gan-preview .num{font-size:1.1rem}
+.sheet-botones{display:flex;gap:10px;margin-top:22px}
+.sheet-botones .btn{padding:14px}
+.aviso{margin-top:14px;background:var(--ambar-suave);color:var(--ambar);border-radius:10px;padding:10px 12px;font-size:.8rem;font-weight:500;display:none}
+
+/* ---------- TOAST / BANNER ---------- */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--tinta);color:#fff;padding:12px 20px;border-radius:99px;font-size:.85rem;font-weight:600;opacity:0;transition:all .25s;z-index:150;pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+#bannerError{display:none;background:var(--rojo-suave);color:var(--rojo);padding:14px 16px;border-radius:12px;font-size:.85rem;font-weight:500;margin-bottom:14px;line-height:1.5}
+.total-mes{background:var(--tinta);color:#fff;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.total-mes .rotulo{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.total-mes .num{font-family:'Archivo';font-stretch:85%;font-weight:800;font-size:1.3rem}
+.btn-wa{background:var(--wa);color:#fff}
+.lista-gastos{margin-top:10px;background:#F8F9FB;border-radius:10px;padding:4px 12px}
+.lista-gastos .renglon{border-color:#E9ECF0;font-size:.82rem}
+.lista-gastos .renglon:last-child{border-bottom:none}
+.debe-badge{background:var(--rojo);color:#fff;font-size:.68rem;font-weight:800;padding:4px 9px;border-radius:99px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>LA CLÍNICA DEL CELULAR</h1>
+    <div class="sub">Gestión de caja y reparaciones. Entrá con el mismo usuario del inventario.</div>
+    <label for="logEmail">Email</label>
+    <input type="email" id="logEmail" autocomplete="username" placeholder="tu@email.com">
+    <label for="logPass">Contraseña</label>
+    <input type="password" id="logPass" autocomplete="current-password" placeholder="••••••••">
+    <div class="login-err" id="logErr"></div>
+    <div class="sheet-botones"><button class="btn btn-verde" id="btnEntrar" style="flex:1">Entrar</button></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<header>
+  <div class="head-row">
+    <div class="brand">GESTIÓN<small>La Clínica del Celular</small></div>
+    <button id="btnSalir">Salir</button>
+  </div>
+  <nav class="tabs">
+    <button class="tab activa" data-tab="cv">Compra · Venta</button>
+    <button class="tab" data-tab="gremio">Gremio</button>
+  </nav>
+</header>
+
+<main>
+  <div id="bannerError"></div>
+
+  <!-- ===== COMPRA VENTA ===== -->
+  <section class="seccion activa" id="sec-cv">
+    <div class="planilla">
+      <div class="rotulo">Caja compra · venta</div>
+      <div class="caja-monto num" id="cajaMonto">$ 0</div>
+      <div class="caja-grid">
+        <div><div class="mini-rotulo">Ganancia acumulada</div><div class="mini-monto verde-t num" id="ganMonto">$ 0</div></div>
+        <div><div class="mini-rotulo">Invertido en stock</div><div class="mini-monto num" id="invMonto">$ 0</div></div>
+      </div>
+      <div class="caja-botones">
+        <button class="btn btn-verde-s" onclick="abrirMovimiento('ingreso')">+ Agregar plata</button>
+        <button class="btn btn-rojo-s" onclick="abrirMovimiento('egreso')">− Retirar plata</button>
+      </div>
+      <details class="plegable"><summary>Movimientos de caja</summary><div id="listaMovs"></div></details>
+      <details class="plegable" open><summary>Resumen de ganancias</summary><div id="ganResumenCV"></div></details>
+    </div>
+
+    <div class="segmentos" id="segCV">
+      <button class="seg activa" data-vista="stock">En stock</button>
+      <button class="seg" data-vista="desarme">Desarme</button>
+      <button class="seg" data-vista="vendidos">Vendidos</button>
+    </div>
+    <div id="listaCV"></div>
+  </section>
+
+  <!-- ===== GREMIO ===== -->
+  <section class="seccion" id="sec-gremio">
+    <div class="chips-resumen">
+      <div class="chip-res"><div class="mini-rotulo">En taller</div><div class="mini-monto num" id="gTaller">0</div></div>
+      <div class="chip-res"><div class="mini-rotulo">Ganancia del mes</div><div class="mini-monto verde-t num" id="gGanMes">$ 0</div></div>
+      <div class="chip-res"><div class="mini-rotulo">Por cobrar</div><div class="mini-monto rojo-t num" id="gDebe">$ 0</div></div>
+    </div>
+    <div class="tarjeta" style="padding:4px 16px 10px;margin-top:10px;margin-bottom:0">
+      <details class="plegable" open><summary>Resumen de ganancias</summary><div id="ganResumenG"></div></details>
+      <details class="plegable"><summary>Retiros de ganancia</summary><div id="listaRetirosG"></div></details>
+      <div class="caja-botones" style="margin-top:10px;margin-bottom:8px">
+        <button class="btn btn-rojo-s" onclick="abrirRetiroGremio()">− Retirar ganancia</button>
+      </div>
+    </div>
+    <div class="filtros">
+      <select id="filtroEstado" onchange="render()">
+        <option value="taller">En taller</option>
+        <option value="observacion">En observación</option>
+        <option value="listo">Listos</option>
+        <option value="retirado">Retirados</option>
+        <option value="sinarreglo">Sin arreglo</option>
+        <option value="todos">Todos</option>
+      </select>
+      <select id="filtroCliente" onchange="render()"><option value="">Todos los clientes</option></select>
+      <button class="btn btn-blanco" style="flex:0 0 auto;padding:10px 14px;font-size:.85rem" onclick="abrirClientes()">👥</button>
+    </div>
+    <div id="resumenCliente"></div>
+    <div id="listaGremio"></div>
+  </section>
+</main>
+
+<button class="fab visible" id="fab" onclick="fabClick()">+ Cargar teléfono</button>
+
+<div id="velo" onclick="cerrarSheet()"></div>
+<div id="sheet"><div class="sheet-asa"></div><div id="sheetContenido"></div></div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmx5IGM5lDDDDD_xrJ1Rmg8FLG3hRWjsE",
+  authDomain: "clinica-celular-f6827.firebaseapp.com",
+  projectId: "clinica-celular-f6827",
+  storageBucket: "clinica-celular-f6827.firebasestorage.app",
+  messagingSenderId: "641319344661",
+  appId: "1:641319344661:web:5bb06e704088f1a3e1571e"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+try{ enableIndexedDbPersistence(db).catch(function(){}); }catch(e){}
+
+const DOC_REF = doc(db,'gestion','datos');
+
+// ================= ESTADO =================
+let DB = null;
+let vistaCV = 'stock';
+let guardando = false;
+
+function baseDB(){
+  return {
+    caja: 0,
+    ganancia: 0,
+    movimientos: [],   // {id, fecha, detalle, monto, tipo:'ingreso'|'egreso'}
+    telefonos: [],     // ver estructura en cada función
+    gremio: { proxOrden: 1, clientes: [], ordenes: [], retiros: [] }
+  };
+}
+
+// ================= UTILIDADES =================
+const $ = function(id){ return document.getElementById(id); };
+function fmt(n){ return '$ ' + Math.round(n||0).toLocaleString('es-AR'); }
+function hoyISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fFecha(iso){ if(!iso) return ''; const p=iso.slice(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function diaSem(iso){ if(!iso) return ''; const D=['domingo','lunes','martes','miércoles','jueves','viernes','sábado']; const d=new Date(iso.slice(0,10)+'T12:00:00'); return D[d.getDay()]; }
+function nid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function num(v){ const n=parseFloat(String(v).replace(/\./g,'').replace(',','.')); return isNaN(n)?0:n; }
+function mesDe(iso){ return iso ? iso.slice(0,7) : ''; }
+function nomMes(m){ const M=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']; const p=m.split('-'); return M[parseInt(p[1])-1]+' '+p[0]; }
+function inversion(t){ return (t.precioCompra||0) + (t.gastos||[]).reduce(function(a,g){return a+(g.monto||0);},0); }
+function waLink(numero, msj){
+  let n = String(numero||'').replace(/\D/g,'');
+  if(n.length===10) n = '549'+n;
+  else if(n.startsWith('15')) n = '54911'+n.slice(2);
+  else if(!n.startsWith('54')) n = '549'+n;
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent(msj);
+}
+let toastT;
+function toast(msj){ const t=$('toast'); t.textContent=msj; t.classList.add('visible'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('visible');},2600); }
+
+// ================= GUARDADO =================
+async function guardar(){
+  if(!DB) return;
+  try{
+    guardando = true;
+    await setDoc(DOC_REF, DB);
+  }catch(e){
+    console.error(e);
+    if(String(e.code).includes('permission')) mostrarErrorPermisos();
+    else toast('No se pudo guardar. Revisá tu conexión.');
+  }
+  guardando = false;
+}
+function mostrarErrorPermisos(){
+  const b=$('bannerError');
+  b.style.display='block';
+  b.innerHTML='<strong>Falta un paso en Firebase.</strong><br>Los permisos todavía no dejan guardar los datos de gestión. Escribile a Claude "no me deja guardar la gestión" y te paso el paso a paso para habilitarlo (se hace una sola vez, 2 minutos).';
+}
+
+// ================= AUTH =================
+$('btnEntrar').addEventListener('click', entrar);
+$('logPass').addEventListener('keydown', function(e){ if(e.key==='Enter') entrar(); });
+async function entrar(){
+  const err=$('logErr'); err.style.display='none';
+  try{
+    await setPersistence(auth, browserLocalPersistence);
+    await signInWithEmailAndPassword(auth, $('logEmail').value.trim(), $('logPass').value);
+  }catch(e){
+    err.style.display='block';
+    err.textContent = 'No se pudo entrar. Revisá el email y la contraseña (son los mismos del inventario).';
+  }
+}
+$('btnSalir').addEventListener('click', function(){ if(confirm('¿Cerrar sesión?')) signOut(auth); });
+
+let escuchando = false;
+onAuthStateChanged(auth, function(user){
+  if(user){
+    $('loginScreen').style.display='none';
+    if(!escuchando){
+      escuchando = true;
+      onSnapshot(DOC_REF, function(snap){
+        if(snap.exists()){ DB = snap.data(); }
+        else { DB = baseDB(); guardar(); }
+        normalizar();
+        render();
+      }, function(e){
+        console.error(e);
+        if(String(e.code).includes('permission')){ DB = DB || baseDB(); mostrarErrorPermisos(); render(); }
+      });
+    }
+  } else {
+    $('loginScreen').style.display='flex';
+  }
+});
+function normalizar(){
+  if(!DB.movimientos) DB.movimientos=[];
+  if(!DB.telefonos) DB.telefonos=[];
+  if(!DB.gremio) DB.gremio={proxOrden:1,clientes:[],ordenes:[]};
+  if(!DB.gremio.clientes) DB.gremio.clientes=[];
+  if(!DB.gremio.ordenes) DB.gremio.ordenes=[];
+  if(!DB.gremio.retiros) DB.gremio.retiros=[];
+  if(!DB.gremio.proxOrden) DB.gremio.proxOrden=1;
+}
+
+// ================= TABS =================
+let tabActiva='cv';
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    tabActiva = t.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('activa', x===t);});
+    $('sec-cv').classList.toggle('activa', tabActiva==='cv');
+    $('sec-gremio').classList.toggle('activa', tabActiva==='gremio');
+    actualizarFab();
+  });
+});
+document.querySelectorAll('#segCV .seg').forEach(function(s){
+  s.addEventListener('click', function(){
+    vistaCV = s.dataset.vista;
+    document.querySelectorAll('#segCV .seg').forEach(function(x){x.classList.toggle('activa', x===s);});
+    render();
+  });
+});
+function actualizarFab(){
+  $('fab').textContent = tabActiva==='cv' ? '+ Cargar teléfono' : '+ Nueva orden de reparación';
+}
+window.fabClick = function(){ if(tabActiva==='cv') abrirCargarTelefono(); else abrirNuevaOrden(); };
+
+// ================= SHEET =================
+function abrirSheet(html){
+  $('sheetContenido').innerHTML = html;
+  $('velo').classList.add('abierto');
+  $('sheet').classList.add('abierto');
+}
+window.cerrarSheet = function(){
+  $('velo').classList.remove('abierto');
+  $('sheet').classList.remove('abierto');
+};
+
+// ================= RENDER =================
+window.render = function(){
+  if(!DB) return;
+  // --- caja ---
+  $('cajaMonto').textContent = fmt(DB.caja);
+  $('cajaMonto').style.color = DB.caja < 0 ? 'var(--rojo)' : 'var(--tinta)';
+  $('ganMonto').textContent = fmt(DB.ganancia);
+  const invStock = DB.telefonos.filter(function(t){return t.estado!=='vendido';}).reduce(function(a,t){return a + (t.estado==='desarme' ? (t.costoRestante||0) : inversion(t));},0);
+  $('invMonto').textContent = fmt(invStock);
+
+  // --- movimientos ---
+  const movs = DB.movimientos.slice().reverse().slice(0,40);
+  $('listaMovs').innerHTML = movs.length ? movs.map(function(m){
+    return '<div class="renglon"><span class="concepto">'+esc(m.detalle)+'<span class="fecha-r">'+fFecha(m.fecha)+'</span></span><span class="guia"></span><span class="monto '+(m.tipo==='ingreso'?'verde-t':'rojo-t')+'">'+(m.tipo==='ingreso'?'+':'−')+' '+fmt(m.monto).slice(2)+'</span>'+
+    '<button style="flex:0 0 auto;color:var(--tinta2);font-size:1rem;padding:2px 4px" onclick="borrarMov(\''+m.id+'\')" aria-label="Borrar movimiento">✕</button></div>';
+  }).join('') : '<div class="renglon"><span class="concepto" style="color:var(--tinta2)">Sin movimientos todavía</span></div>';
+
+  // --- resumen de ganancias compra-venta ---
+  $('ganResumenCV').innerHTML = renglonesGanancia(eventosGananciaCV());
+
+  renderCV();
+  renderGremio();
+};
+
+// ---------- render compra venta ----------
+function renderCV(){
+  const cont = $('listaCV');
+  if(vistaCV==='stock'){
+    const lista = DB.telefonos.filter(function(t){return t.estado==='stock';}).slice().reverse();
+    cont.innerHTML = lista.length ? lista.map(tarjetaStock).join('') :
+      '<div class="vacio"><strong>Sin teléfonos en stock</strong>Tocá el botón de abajo para cargar el primero.</div>';
+  } else if(vistaCV==='desarme'){
+    const lista = DB.telefonos.filter(function(t){return t.estado==='desarme';}).slice().reverse();
+    cont.innerHTML = lista.length ? lista.map(tarjetaDesarme).join('') :
+      '<div class="vacio"><strong>Nada en desarme</strong>Cuando un teléfono no salga entero, marcalo para desarme y vendé sus repuestos.</div>';
+  } else {
+    renderVendidos(cont);
+  }
+}
+
+function tarjetaStock(t){
+  const inv = inversion(t);
+  const ganEst = (t.estimado||0) - inv;
+  const gastosHTML = (t.gastos&&t.gastos.length) ?
+    '<details class="plegable"><summary>Detalle de gastos ('+t.gastos.length+')</summary><div class="lista-gastos">'+
+    t.gastos.map(function(g){return '<div class="renglon"><span class="concepto">'+esc(g.desc)+'<span class="fecha-r">'+fFecha(g.fecha)+'</span></span><span class="guia"></span><span class="monto">'+fmt(g.monto)+'</span></div>';}).join('')+
+    '<div class="renglon"><span class="concepto"><strong>Compra del equipo</strong></span><span class="guia"></span><span class="monto">'+fmt(t.precioCompra)+'</span></div></div></details>' : '';
+  return '<div class="tarjeta">'+
+    '<div class="t-cab"><div><div class="t-titulo">'+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="t-sub">'+(t.imei?('IMEI '+esc(t.imei)+' · '):'')+'Comprado a '+esc(t.proveedor||'—')+' el '+fFecha(t.fechaCompra)+'</div></div>'+
+    '<span class="chip chip-verde">En stock</span></div>'+
+    '<div class="datos-fila">'+
+    '<div class="dato"><div class="mini-rotulo">Inversión</div><div class="mini-monto num">'+fmt(inv)+'</div></div>'+
+    '<div class="dato"><div class="mini-rotulo">Venta estimada</div><div class="mini-monto num">'+fmt(t.estimado)+'</div></div>'+
+    '<div class="dato"><div class="mini-rotulo">Ganancia est.</div><div class="mini-monto num '+(ganEst>=0?'verde-t':'rojo-t')+'">'+fmt(ganEst)+'</div></div>'+
+    '</div>'+ gastosHTML +
+    '<div class="t-acciones">'+
+    '<button class="btn btn-blanco" onclick="abrirGasto(\''+t.id+'\')">+ Gasto</button>'+
+    '<button class="btn btn-verde" onclick="abrirVender(\''+t.id+'\')">Vender</button>'+
+    '<button class="btn-menu" onclick="abrirMenuTel(\''+t.id+'\')">⋯</button>'+
+    '</div></div>';
+}
+
+function tarjetaDesarme(t){
+  const inv = inversion(t);
+  const recuperado = (t.repuestos||[]).reduce(function(a,r){return a+r.monto;},0);
+  const repHTML = (t.repuestos&&t.repuestos.length) ?
+    '<details class="plegable"><summary>Repuestos vendidos ('+t.repuestos.length+')</summary><div class="lista-gastos">'+
+    t.repuestos.map(function(r){return '<div class="renglon"><span class="concepto">'+esc(r.desc)+'<span class="fecha-r">'+fFecha(r.fecha)+'</span></span><span class="guia"></span><span class="monto verde-t">'+fmt(r.monto)+'</span></div>';}).join('')+'</div></details>' : '';
+  return '<div class="tarjeta">'+
+    '<div class="t-cab"><div><div class="t-titulo">'+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="t-sub">Inversión total '+fmt(inv)+' · lleva recuperado '+fmt(recuperado)+'</div></div>'+
+    '<span class="chip chip-ambar">Desarme</span></div>'+
+    '<div class="datos-fila">'+
+    '<div class="dato"><div class="mini-rotulo">Falta recuperar</div><div class="mini-monto num '+((t.costoRestante||0)>0?'ambar-t':'verde-t')+'">'+fmt(t.costoRestante)+'</div></div>'+
+    '<div class="dato"><div class="mini-rotulo">Ganancia hasta hoy</div><div class="mini-monto num verde-t">'+fmt(Math.max(0,recuperado-inv))+'</div></div>'+
+    '</div>'+ repHTML +
+    '<div class="t-acciones">'+
+    '<button class="btn btn-verde" onclick="abrirVentaRepuesto(\''+t.id+'\')">+ Venta de repuesto</button>'+
+    '<button class="btn btn-blanco" onclick="finalizarDesarme(\''+t.id+'\')">Finalizar</button>'+
+    '</div></div>';
+}
+
+function renderVendidos(cont){
+  const vendidos = DB.telefonos.filter(function(t){return t.estado==='vendido';})
+    .sort(function(a,b){ return (b.venta.fecha||'').localeCompare(a.venta.fecha||''); });
+  if(!vendidos.length){ cont.innerHTML = '<div class="vacio"><strong>Todavía no vendiste ninguno</strong>Acá va a quedar el historial con la ganancia de cada venta.</div>'; return; }
+  const meses = [];
+  vendidos.forEach(function(t){ const m=mesDe(t.venta.fecha); if(m && meses.indexOf(m)<0) meses.push(m); });
+  const sel = window._mesSel && meses.indexOf(window._mesSel)>=0 ? window._mesSel : meses[0];
+  window._mesSel = sel;
+  const delMes = vendidos.filter(function(t){return mesDe(t.venta.fecha)===sel;});
+  const ganMes = delMes.reduce(function(a,t){return a+(t.venta.ganancia||0);},0);
+  cont.innerHTML =
+    '<select style="margin-bottom:12px" onchange="window._mesSel=this.value;render()">'+
+    meses.map(function(m){return '<option value="'+m+'" '+(m===sel?'selected':'')+'>'+nomMes(m)+'</option>';}).join('')+'</select>'+
+    '<div class="total-mes"><span class="rotulo">Ganancia de '+nomMes(sel)+' · '+delMes.length+' venta'+(delMes.length===1?'':'s')+'</span><span class="num">'+fmt(ganMes)+'</span></div>'+
+    delMes.map(function(t){
+      const v=t.venta;
+      return '<div class="tarjeta"><div class="t-cab"><div><div class="t-titulo">'+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+      '<div class="t-sub">'+(t.fueDesarme?'Desarmado y vendido por partes':'Vendido a '+esc(v.comprador||'—')+(v.telefono?(' · '+esc(v.telefono)):''))+' · '+fFecha(v.fecha)+'</div></div>'+
+      '<span class="chip chip-gris">Vendido</span></div>'+
+      '<div class="datos-fila">'+
+      '<div class="dato"><div class="mini-rotulo">Inversión</div><div class="mini-monto num">'+fmt(v.inversion)+'</div></div>'+
+      '<div class="dato"><div class="mini-rotulo">'+(t.fueDesarme?'Total repuestos':'Precio de venta')+'</div><div class="mini-monto num">'+fmt(v.precio)+'</div></div>'+
+      '<div class="dato"><div class="mini-rotulo">Ganancia</div><div class="mini-monto num '+((v.ganancia||0)>=0?'verde-t':'rojo-t')+'">'+fmt(v.ganancia)+'</div></div>'+
+      '</div>'+
+      '<div class="t-acciones"><button class="btn btn-blanco" onclick="abrirMenuVendido(\''+t.id+'\')">Modificar / deshacer</button></div>'+
+      '</div>';
+    }).join('');
+}
+
+// ---------- render gremio ----------
+function renderGremio(){
+  const G = DB.gremio;
+  const enTaller = G.ordenes.filter(function(o){return o.estado==='observacion'||o.estado==='listo';});
+  $('gTaller').textContent = enTaller.length;
+  const mesAct = hoyISO().slice(0,7);
+  const ganMesBruta = G.ordenes.filter(function(o){return o.estado==='retirado' && mesDe(o.fechaRetiro)===mesAct;})
+    .reduce(function(a,o){return a+((o.precio||0)-(o.costo||0));},0);
+  const retMes = (G.retiros||[]).filter(function(r){return mesDe(r.fecha)===mesAct;})
+    .reduce(function(a,r){return a+(r.monto||0);},0);
+  $('gGanMes').textContent = fmt(ganMesBruta - retMes);
+  const debe = G.ordenes.filter(function(o){return o.estado==='retirado' && !o.pagado;})
+    .reduce(function(a,o){return a+(o.precio||0);},0);
+  $('gDebe').textContent = fmt(debe);
+  $('ganResumenG').innerHTML = renglonesGanancia(eventosGananciaGremio());
+
+  // informe de retiros
+  const retiros = (G.retiros||[]).slice().sort(function(a,b){return a.fecha<b.fecha?1:-1;});
+  const totRet = retiros.reduce(function(a,r){return a+(r.monto||0);},0);
+  $('listaRetirosG').innerHTML = retiros.length ?
+    '<div class="renglon"><span class="concepto" style="font-weight:700">Total retirado</span><span class="guia"></span><span class="monto rojo-t" style="font-weight:700">'+fmt(totRet)+'</span></div>' +
+    retiros.map(function(r){
+      return '<div class="renglon"><span class="concepto">'+esc(r.motivo)+'<span class="fecha-r">'+diaSem(r.fecha)+' '+fFecha(r.fecha)+'</span></span><span class="guia"></span><span class="monto rojo-t">− '+fmt(r.monto).slice(2)+'</span>'+
+      '<button style="flex:0 0 auto;color:var(--tinta2);font-size:1rem;padding:2px 4px" onclick="borrarRetiroGremio(\''+r.id+'\')" aria-label="Borrar retiro">✕</button></div>';
+    }).join('')
+    : '<div class="renglon"><span class="concepto" style="color:var(--tinta2)">Sin retiros todavía</span></div>';
+
+  // filtro clientes
+  const selC = $('filtroCliente');
+  const actual = selC.value;
+  selC.innerHTML = '<option value="">Todos los clientes</option>' + G.clientes.map(function(c){
+    return '<option value="'+esc(c.nombre)+'" '+(c.nombre===actual?'selected':'')+'>'+esc(c.nombre)+'</option>';
+  }).join('');
+
+  const fE = $('filtroEstado').value, fC = selC.value;
+  let lista = G.ordenes.slice().reverse();
+  if(fE==='taller') lista = lista.filter(function(o){return o.estado==='observacion'||o.estado==='listo';});
+  else if(fE!=='todos') lista = lista.filter(function(o){return o.estado===fE;});
+  if(fC) lista = lista.filter(function(o){return o.cliente===fC;});
+
+  // resumen por cliente
+  const rc = $('resumenCliente');
+  if(fC){
+    const todas = G.ordenes.filter(function(o){return o.cliente===fC;});
+    const fact = todas.filter(function(o){return o.estado==='retirado';}).reduce(function(a,o){return a+(o.precio||0);},0);
+    const deuda = todas.filter(function(o){return o.estado==='retirado'&&!o.pagado;}).reduce(function(a,o){return a+(o.precio||0);},0);
+    rc.innerHTML = '<div class="total-mes"><span class="rotulo">'+esc(fC)+' · facturado '+fmt(fact)+'</span><span class="num '+(deuda>0?'':'')+'">'+(deuda>0?('debe '+fmt(deuda)):'al día ✓')+'</span></div>';
+  } else rc.innerHTML='';
+
+  $('listaGremio').innerHTML = lista.length ? lista.map(tarjetaOrden).join('') :
+    '<div class="vacio"><strong>Nada por acá</strong>Cargá una orden nueva con el botón de abajo o cambiá el filtro.</div>';
+}
+
+const ESTADOS = {
+  observacion: {txt:'En observación', chip:'chip-ambar'},
+  listo:       {txt:'Listo', chip:'chip-verde'},
+  retirado:    {txt:'Retirado', chip:'chip-gris'},
+  sinarreglo:  {txt:'Sin arreglo', chip:'chip-rojo'}
+};
+
+function tarjetaOrden(o){
+  const gan = (o.precio||0)-(o.costo||0);
+  const est = ESTADOS[o.estado]||ESTADOS.observacion;
+  let acciones = '';
+  if(o.estado==='observacion'){
+    acciones = '<button class="btn btn-verde" onclick="marcarListo(\''+o.id+'\')">Marcar listo ✓</button>';
+  } else if(o.estado==='listo'){
+    acciones = '<button class="btn btn-wa" onclick="avisarWA(\''+o.id+'\')">Avisar por WhatsApp</button>'+
+               '<button class="btn btn-blanco" onclick="marcarRetirado(\''+o.id+'\')">Retirado</button>';
+  } else if(o.estado==='retirado' && !o.pagado){
+    acciones = '<button class="btn btn-verde" onclick="marcarPagado(\''+o.id+'\')">Registrar pago</button>';
+  } else if(o.estado==='sinarreglo'){
+    acciones = '<button class="btn btn-wa" onclick="avisarWA(\''+o.id+'\')">Avisar por WhatsApp</button>';
+  }
+  return '<div class="tarjeta">'+
+    '<div class="t-cab"><div><div class="t-titulo">#'+String(o.orden).padStart(3,'0')+' · '+esc(o.marca)+' '+esc(o.modelo)+'</div>'+
+    '<div class="t-sub">'+esc(o.cliente)+' · ingresó '+fFecha(o.fechaIngreso)+(o.estado==='retirado'?(' · retirado '+fFecha(o.fechaRetiro)):'')+'</div>'+
+    '<div class="t-sub" style="margin-top:4px;color:var(--tinta)">'+esc(o.reparacion)+'</div></div>'+
+    '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><span class="chip '+est.chip+'">'+est.txt+'</span>'+
+    (o.estado==='retirado' ? (o.pagado?'<span class="chip chip-verde">Pagado</span>':'<span class="debe-badge">DEBE</span>') : '')+'</div></div>'+
+    '<div class="datos-fila">'+
+    '<div class="dato"><div class="mini-rotulo">Costo</div><div class="mini-monto num">'+fmt(o.costo)+'</div></div>'+
+    '<div class="dato"><div class="mini-rotulo">Precio gremio</div><div class="mini-monto num">'+fmt(o.precio)+'</div></div>'+
+    '<div class="dato"><div class="mini-rotulo">Ganancia</div><div class="mini-monto num '+(gan>=0?'verde-t':'rojo-t')+'">'+fmt(gan)+'</div></div>'+
+    '</div>'+
+    '<div class="t-acciones">'+acciones+'<button class="btn-menu" onclick="abrirMenuOrden(\''+o.id+'\')">⋯</button></div>'+
+    '</div>';
+}
+
+// ================= GANANCIAS POR PERÍODO =================
+function lunesISO(){
+  const d = new Date();
+  d.setDate(d.getDate() - ((d.getDay()+6)%7));
+  return d.toISOString().slice(0,10);
+}
+function eventosGananciaCV(){
+  // lista de {fecha, gan} de todas las ganancias de compra-venta
+  const ev = [];
+  DB.telefonos.forEach(function(t){
+    if(t.estado==='vendido'){
+      if(t.fueDesarme){
+        let repartido = 0;
+        (t.repuestos||[]).forEach(function(r){ if(typeof r.gan==='number'){ ev.push({fecha:r.fecha, gan:r.gan}); repartido += r.gan; } });
+        ev.push({fecha:t.venta.fecha, gan:(t.venta.ganancia||0) - repartido});
+      } else {
+        ev.push({fecha:t.venta.fecha, gan:t.venta.ganancia||0});
+      }
+    } else if(t.estado==='desarme'){
+      (t.repuestos||[]).forEach(function(r){ if(typeof r.gan==='number') ev.push({fecha:r.fecha, gan:r.gan}); });
+    }
+  });
+  return ev;
+}
+function eventosGananciaGremio(){
+  const ev = DB.gremio.ordenes.filter(function(o){return o.estado==='retirado';})
+    .map(function(o){ return {fecha:o.fechaRetiro, gan:(o.precio||0)-(o.costo||0)}; });
+  (DB.gremio.retiros||[]).forEach(function(r){ ev.push({fecha:r.fecha, gan:-(r.monto||0)}); });
+  return ev;
+}
+function renglonesGanancia(eventos){
+  const hoy = hoyISO(), mes = hoy.slice(0,7), lunes = lunesISO();
+  let gHoy=0, gSem=0, gMes=0, gTot=0;
+  eventos.forEach(function(e){
+    const f = e.fecha||'';
+    gTot += e.gan;
+    if(f===hoy) gHoy += e.gan;
+    if(f>=lunes) gSem += e.gan;
+    if(mesDe(f)===mes) gMes += e.gan;
+  });
+  function fila(rot, val){
+    return '<div class="renglon"><span class="concepto">'+rot+'</span><span class="guia"></span><span class="monto '+(val>=0?'verde-t':'rojo-t')+'">'+fmt(val)+'</span></div>';
+  }
+  return fila('Hoy', gHoy) + fila('Esta semana (desde el lunes)', gSem) + fila('Este mes', gMes) + fila('Total histórico', gTot);
+}
+
+// ================= BORRAR MOVIMIENTO =================
+window.borrarMov = function(id){
+  const m = DB.movimientos.find(function(x){return x.id===id;}); if(!m) return;
+  if(m.retiroGremio){ borrarRetiroGremio(m.retiroGremio); return; }
+  let msj;
+  if(m.manual){
+    msj = '¿Borrar "'+m.detalle+'" ('+fmt(m.monto)+')?\n\nComo es un movimiento manual, la caja se revierte: '+(m.tipo==='ingreso'?'se restan':'vuelven')+' '+fmt(m.monto)+'.';
+  } else {
+    msj = '¿Borrar "'+m.detalle+'" ('+fmt(m.monto)+') del historial?\n\nSolo se borra el renglón, el saldo de la caja NO cambia. Si querés revertir una compra o una venta, usá Anular compra o Deshacer venta.';
+  }
+  if(!confirm(msj)) return;
+  if(m.manual){
+    DB.caja += (m.tipo==='ingreso' ? -m.monto : m.monto);
+  }
+  DB.movimientos = DB.movimientos.filter(function(x){return x.id!==id;});
+  guardar(); render(); toast('Movimiento borrado');
+};
+
+// ================= MOVIMIENTOS DE CAJA =================
+window.abrirMovimiento = function(tipo){
+  const ing = tipo==='ingreso';
+  abrirSheet(
+    '<div class="sheet-titulo">'+(ing?'Agregar plata a la caja':'Retirar plata de la caja')+'</div>'+
+    '<div class="sheet-sub">Queda registrado en los movimientos.</div>'+
+    '<label>Monto</label><input type="text" inputmode="numeric" id="mMonto" placeholder="0">'+
+    '<label>Motivo</label><input type="text" id="mDetalle" placeholder="'+(ing?'Ej: aporte de capital':'Ej: retiro de ganancia')+'">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn '+(ing?'btn-verde':'btn-rojo-s')+'" onclick="confMovimiento(\''+tipo+'\')">'+(ing?'Agregar':'Retirar')+'</button></div>'
+  );
+};
+window.confMovimiento = function(tipo){
+  const monto = num($('mMonto').value);
+  if(monto<=0){ toast('Poné un monto válido'); return; }
+  const detalle = $('mDetalle').value.trim() || (tipo==='ingreso'?'Ingreso manual':'Retiro manual');
+  DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:detalle, monto:monto, tipo:tipo, manual:true});
+  DB.caja += (tipo==='ingreso'? monto : -monto);
+  guardar(); render(); cerrarSheet();
+  toast(tipo==='ingreso' ? 'Plata agregada a la caja' : 'Retiro registrado');
+};
+
+// ================= CARGAR TELÉFONO =================
+window.abrirCargarTelefono = function(){
+  abrirSheet(
+    '<div class="sheet-titulo">Cargar teléfono comprado</div>'+
+    '<div class="sheet-sub">El precio de compra se descuenta de la caja.</div>'+
+    '<div class="fila-2"><div><label>Marca</label><input id="tMarca" placeholder="Samsung"></div>'+
+    '<div><label>Modelo</label><input id="tModelo" placeholder="A32"></div></div>'+
+    '<label>IMEI (opcional)</label><input id="tImei" inputmode="numeric" placeholder="Marcá *#06# para verlo">'+
+    '<label>Estado / detalle</label><input id="tDetalle" placeholder="Ej: pantalla rota, enciende">'+
+    '<label>¿A quién se lo compraste?</label><input id="tProv" placeholder="Nombre del vendedor">'+
+    '<div class="fila-2"><div><label>Fecha</label><input type="date" id="tFecha" value="'+hoyISO()+'"></div>'+
+    '<div><label>Precio de compra</label><input type="text" inputmode="numeric" id="tPrecio" placeholder="0"></div></div>'+
+    '<label>Precio de venta estimado</label><input type="text" inputmode="numeric" id="tEstimado" placeholder="0">'+
+    '<div class="aviso" id="tAviso"></div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confCargarTelefono()">Guardar compra</button></div>'
+  );
+};
+window.confCargarTelefono = function(){
+  const marca=$('tMarca').value.trim(), modelo=$('tModelo').value.trim(), precio=num($('tPrecio').value);
+  if(!marca || !modelo || precio<=0){ toast('Completá marca, modelo y precio'); return; }
+  if(precio > DB.caja){
+    const av=$('tAviso');
+    if(av.style.display!=='block'){ av.style.display='block'; av.textContent='Ojo: la caja tiene '+fmt(DB.caja)+' y esta compra es de '+fmt(precio)+'. Si es correcto, tocá Guardar de nuevo.'; return; }
+  }
+  const t = {
+    id:nid(), marca:marca, modelo:modelo, imei:$('tImei').value.trim(), detalle:$('tDetalle').value.trim(),
+    proveedor:$('tProv').value.trim(), fechaCompra:$('tFecha').value||hoyISO(),
+    precioCompra:precio, estimado:num($('tEstimado').value), gastos:[], estado:'stock'
+  };
+  DB.telefonos.push(t);
+  DB.caja -= precio;
+  DB.movimientos.push({id:nid(), fecha:t.fechaCompra, detalle:'Compra '+marca+' '+modelo, monto:precio, tipo:'egreso'});
+  guardar(); render(); cerrarSheet(); toast(marca+' '+modelo+' cargado');
+};
+
+// ================= GASTO EN TELÉFONO =================
+window.abrirGasto = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  abrirSheet(
+    '<div class="sheet-titulo">Gasto en '+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="sheet-sub">Se suma a la inversión del equipo y se descuenta de la caja.</div>'+
+    '<label>¿Qué le pusiste?</label><input id="gDesc" placeholder="Ej: pantalla nueva">'+
+    '<label>Monto</label><input type="text" inputmode="numeric" id="gMonto" placeholder="0">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confGasto(\''+id+'\')">Guardar gasto</button></div>'
+  );
+};
+window.confGasto = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const monto = num($('gMonto').value), desc=$('gDesc').value.trim();
+  if(!desc || monto<=0){ toast('Completá el detalle y el monto'); return; }
+  t.gastos.push({desc:desc, monto:monto, fecha:hoyISO()});
+  DB.caja -= monto;
+  DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:desc+' · '+t.marca+' '+t.modelo, monto:monto, tipo:'egreso'});
+  guardar(); render(); cerrarSheet(); toast('Gasto guardado');
+};
+
+// ================= VENDER TELÉFONO =================
+window.abrirVender = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const inv = inversion(t);
+  abrirSheet(
+    '<div class="sheet-titulo">Vender '+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="sheet-sub">Inversión total: '+fmt(inv)+'. El costo vuelve a la caja y la ganancia queda aparte.</div>'+
+    '<label>¿A quién se lo vendiste?</label><input id="vComprador" placeholder="Nombre">'+
+    '<label>WhatsApp del comprador (opcional)</label><input id="vTel" inputmode="tel" placeholder="11 2345 6789">'+
+    '<div class="fila-2"><div><label>Fecha</label><input type="date" id="vFecha" value="'+hoyISO()+'"></div>'+
+    '<div><label>Precio de venta</label><input type="text" inputmode="numeric" id="vPrecio" placeholder="0" oninput="previewGan('+inv+')"></div></div>'+
+    '<div class="gan-preview"><span>Ganancia</span><span class="num" id="vGan">$ 0</span></div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confVender(\''+id+'\')">Confirmar venta</button></div>'
+  );
+};
+window.previewGan = function(inv){
+  const g = num($('vPrecio').value) - inv;
+  const el=$('vGan'); el.textContent = fmt(g);
+  el.parentElement.style.background = g>=0 ? 'var(--verde-suave)' : 'var(--rojo-suave)';
+  el.parentElement.style.color = g>=0 ? 'var(--verde)' : 'var(--rojo)';
+};
+window.confVender = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const precio = num($('vPrecio').value);
+  if(precio<=0){ toast('Poné el precio de venta'); return; }
+  const inv = inversion(t);
+  const gan = precio - inv;
+  const vuelveACaja = Math.min(precio, inv);   // recupero del costo
+  t.estado='vendido';
+  t.venta = { comprador:$('vComprador').value.trim(), telefono:$('vTel').value.trim(),
+              fecha:$('vFecha').value||hoyISO(), precio:precio, inversion:inv, ganancia:gan };
+  DB.caja += vuelveACaja;
+  DB.ganancia += gan;
+  DB.movimientos.push({id:nid(), fecha:t.venta.fecha, detalle:'Recupero venta '+t.marca+' '+t.modelo, monto:vuelveACaja, tipo:'ingreso'});
+  guardar(); render(); cerrarSheet();
+  toast(gan>=0 ? 'Vendido · ganancia '+fmt(gan) : 'Vendido con pérdida de '+fmt(-gan));
+};
+
+// ================= DESARME =================
+window.abrirMenuTel = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  abrirSheet(
+    '<div class="sheet-titulo">'+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="sheet-sub">'+esc(t.detalle||'')+'</div>'+
+    '<div class="sheet-botones" style="flex-direction:column">'+
+    '<button class="btn btn-blanco" onclick="abrirEditarTel(\''+id+'\')">✏️ Editar datos</button>'+
+    '<button class="btn btn-blanco" onclick="marcarDesarme(\''+id+'\')">🔩 Pasar a desarme (vender por partes)</button>'+
+    '<button class="btn btn-rojo-s" onclick="eliminarTel(\''+id+'\')">🗑 Anular compra (devuelve la plata a la caja)</button>'+
+    '</div>'
+  );
+};
+window.marcarDesarme = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  t.estado='desarme'; t.repuestos=[]; t.costoRestante=inversion(t);
+  guardar(); render(); cerrarSheet(); toast('Pasado a desarme');
+};
+window.abrirVentaRepuesto = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  abrirSheet(
+    '<div class="sheet-titulo">Venta de repuesto</div>'+
+    '<div class="sheet-sub">'+esc(t.marca)+' '+esc(t.modelo)+' · falta recuperar '+fmt(t.costoRestante)+'. Primero se recupera el costo, lo que sobra es ganancia.</div>'+
+    '<label>¿Qué repuesto vendiste?</label><input id="rDesc" placeholder="Ej: placa madre">'+
+    '<label>Monto</label><input type="text" inputmode="numeric" id="rMonto" placeholder="0">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confVentaRepuesto(\''+id+'\')">Guardar venta</button></div>'
+  );
+};
+window.confVentaRepuesto = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const monto = num($('rMonto').value), desc=$('rDesc').value.trim();
+  if(!desc || monto<=0){ toast('Completá el repuesto y el monto'); return; }
+  t.repuestos.push({desc:desc, monto:monto, fecha:hoyISO(), gan:monto-Math.min(monto, t.costoRestante||0)});
+  const recupero = Math.min(monto, t.costoRestante||0);
+  const gan = monto - recupero;
+  t.costoRestante = (t.costoRestante||0) - recupero;
+  DB.caja += recupero;
+  DB.ganancia += gan;
+  if(recupero>0) DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:'Recupero repuesto '+t.marca+' '+t.modelo, monto:recupero, tipo:'ingreso'});
+  guardar(); render(); cerrarSheet(); toast('Venta guardada'+(gan>0?(' · ganancia '+fmt(gan)):''));
+};
+window.finalizarDesarme = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const inv = inversion(t);
+  const total = (t.repuestos||[]).reduce(function(a,r){return a+r.monto;},0);
+  if(!confirm('¿Dar por terminado el desarme? Pasa al historial con ganancia final de '+fmt(total-inv)+'.')) return;
+  t.estado='vendido'; t.fueDesarme=true;
+  t.venta = { comprador:'', telefono:'', fecha:hoyISO(), precio:total, inversion:inv, ganancia:total-inv, perdidaAjuste:(t.costoRestante||0) };
+  if(t.costoRestante>0){ DB.ganancia -= t.costoRestante; t.costoRestante=0; } // costo no recuperado = pérdida
+  guardar(); render(); toast('Desarme finalizado');
+};
+window.eliminarTel = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  const inv = t.estado==='desarme' ? (t.costoRestante||0) : inversion(t);
+  if(!confirm('¿Anular la compra de '+t.marca+' '+t.modelo+'? Vuelven '+fmt(inv)+' a la caja y se borra el registro.')) return;
+  DB.caja += inv;
+  DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:'Anulación compra '+t.marca+' '+t.modelo, monto:inv, tipo:'ingreso'});
+  DB.telefonos = DB.telefonos.filter(function(x){return x.id!==id;});
+  guardar(); render(); cerrarSheet(); toast('Compra anulada');
+};
+
+// ================= EDITAR TELÉFONO =================
+window.abrirEditarTel = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  abrirSheet(
+    '<div class="sheet-titulo">Editar teléfono</div>'+
+    '<div class="sheet-sub">El precio de compra no se toca desde acá para no desbalancear la caja. Si lo cargaste mal, anulá la compra y cargalo de nuevo.</div>'+
+    '<div class="fila-2"><div><label>Marca</label><input id="eMarca" value="'+esc(t.marca)+'"></div>'+
+    '<div><label>Modelo</label><input id="eModelo" value="'+esc(t.modelo)+'"></div></div>'+
+    '<label>IMEI</label><input id="eImei" value="'+esc(t.imei)+'">'+
+    '<label>Estado / detalle</label><input id="eDetalle" value="'+esc(t.detalle)+'">'+
+    '<label>Comprado a</label><input id="eProv" value="'+esc(t.proveedor)+'">'+
+    '<label>Precio de venta estimado</label><input type="text" inputmode="numeric" id="eEstimado" value="'+(t.estimado||'')+'">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confEditarTel(\''+id+'\')">Guardar cambios</button></div>'
+  );
+};
+window.confEditarTel = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t) return;
+  t.marca=$('eMarca').value.trim(); t.modelo=$('eModelo').value.trim();
+  t.imei=$('eImei').value.trim(); t.detalle=$('eDetalle').value.trim();
+  t.proveedor=$('eProv').value.trim(); t.estimado=num($('eEstimado').value);
+  guardar(); render(); cerrarSheet(); toast('Cambios guardados');
+};
+
+// ================= VENDIDOS: MENÚ / DESHACER / EDITAR =================
+window.abrirMenuVendido = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t||!t.venta) return;
+  abrirSheet(
+    '<div class="sheet-titulo">'+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="sheet-sub">'+(t.fueDesarme?'Desarme finalizado':'Vendido')+' el '+fFecha(t.venta.fecha)+' por '+fmt(t.venta.precio)+'</div>'+
+    '<div class="sheet-botones" style="flex-direction:column">'+
+    (t.fueDesarme ? '' : '<button class="btn btn-blanco" onclick="abrirEditarVenta(\''+id+'\')">✏️ Editar datos de la venta</button>')+
+    '<button class="btn btn-rojo-s" onclick="deshacerVenta(\''+id+'\')">↩️ Deshacer '+(t.fueDesarme?'(vuelve a Desarme)':'venta (vuelve a En stock)')+'</button>'+
+    '</div>'
+  );
+};
+window.deshacerVenta = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t||!t.venta) return;
+  const v = t.venta;
+  if(t.fueDesarme){
+    if(!confirm('¿Deshacer? '+t.marca+' '+t.modelo+' vuelve al apartado Desarme, como estaba antes de finalizarlo.')) return;
+    DB.ganancia += (v.perdidaAjuste||0);
+    t.costoRestante = (v.perdidaAjuste||0);
+    t.estado='desarme'; delete t.fueDesarme; delete t.venta;
+    guardar(); render(); cerrarSheet(); toast('Volvió a Desarme');
+    return;
+  }
+  const vuelve = Math.min(v.precio, v.inversion);
+  if(!confirm('¿Deshacer la venta de '+t.marca+' '+t.modelo+'?\n\nSe restan '+fmt(vuelve)+' de la caja y '+fmt(v.ganancia)+' de la ganancia. El teléfono vuelve a En stock como estaba.')) return;
+  DB.caja -= vuelve;
+  DB.ganancia -= v.ganancia;
+  DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:'Venta deshecha '+t.marca+' '+t.modelo, monto:vuelve, tipo:'egreso'});
+  t.estado='stock'; delete t.venta;
+  guardar(); render(); cerrarSheet(); toast('Venta deshecha · volvió a En stock');
+};
+window.abrirEditarVenta = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t||!t.venta) return;
+  const v = t.venta;
+  abrirSheet(
+    '<div class="sheet-titulo">Editar venta · '+esc(t.marca)+' '+esc(t.modelo)+'</div>'+
+    '<div class="sheet-sub">Si cambiás el precio, la caja y la ganancia se ajustan solas por la diferencia.</div>'+
+    '<label>¿A quién se lo vendiste?</label><input id="evComprador" value="'+esc(v.comprador)+'">'+
+    '<label>WhatsApp del comprador</label><input id="evTel" inputmode="tel" value="'+esc(v.telefono)+'">'+
+    '<div class="fila-2"><div><label>Fecha</label><input type="date" id="evFecha" value="'+esc(v.fecha)+'"></div>'+
+    '<div><label>Precio de venta</label><input type="text" inputmode="numeric" id="evPrecio" value="'+(v.precio||'')+'"></div></div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confEditarVenta(\''+id+'\')">Guardar cambios</button></div>'
+  );
+};
+window.confEditarVenta = function(id){
+  const t = DB.telefonos.find(function(x){return x.id===id;}); if(!t||!t.venta) return;
+  const v = t.venta;
+  const nuevoPrecio = num($('evPrecio').value);
+  if(nuevoPrecio<=0){ toast('Poné un precio válido'); return; }
+  const viejoVuelve = Math.min(v.precio, v.inversion);
+  const nuevoVuelve = Math.min(nuevoPrecio, v.inversion);
+  const viejaGan = v.ganancia;
+  const nuevaGan = nuevoPrecio - v.inversion;
+  if(nuevoVuelve !== viejoVuelve){
+    const dif = nuevoVuelve - viejoVuelve;
+    DB.caja += dif;
+    DB.movimientos.push({id:nid(), fecha:hoyISO(), detalle:'Ajuste venta '+t.marca+' '+t.modelo, monto:Math.abs(dif), tipo:(dif>=0?'ingreso':'egreso')});
+  }
+  DB.ganancia += (nuevaGan - viejaGan);
+  v.comprador=$('evComprador').value.trim(); v.telefono=$('evTel').value.trim();
+  v.fecha=$('evFecha').value||v.fecha; v.precio=nuevoPrecio; v.ganancia=nuevaGan;
+  guardar(); render(); cerrarSheet(); toast('Venta actualizada');
+};
+
+// ================= GREMIO: RETIROS DE GANANCIA =================
+window.abrirRetiroGremio = function(){
+  abrirSheet(
+    '<div class="sheet-titulo">Retirar ganancia del gremio</div>'+
+    '<div class="sheet-sub">Se descuenta de la caja y de la ganancia del gremio. Queda registrado en el informe de retiros.</div>'+
+    '<label>Monto</label><input type="text" inputmode="numeric" id="rgMonto" placeholder="0">'+
+    '<label>Fecha</label><input type="date" id="rgFecha" value="'+hoyISO()+'">'+
+    '<label>Motivo</label><input type="text" id="rgMotivo" placeholder="Ej: retiro personal, pago de alquiler">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-rojo-s" onclick="confRetiroGremio()">Retirar</button></div>'
+  );
+};
+window.confRetiroGremio = function(){
+  const monto = num($('rgMonto').value);
+  if(monto<=0){ toast('Poné un monto válido'); return; }
+  if(monto > DB.caja){
+    if(!confirm('El retiro ('+fmt(monto)+') es mayor que lo que hay en la caja ('+fmt(DB.caja)+'). ¿Registrarlo igual? La caja va a quedar en negativo.')) return;
+  }
+  const motivo = $('rgMotivo').value.trim() || 'Retiro de ganancia gremio';
+  const fecha = $('rgFecha').value || hoyISO();
+  const rid = nid();
+  DB.gremio.retiros.push({id:rid, fecha:fecha, monto:monto, motivo:motivo});
+  DB.caja -= monto;
+  DB.movimientos.push({id:nid(), fecha:fecha, detalle:'Retiro gremio · '+motivo, monto:monto, tipo:'egreso', retiroGremio:rid});
+  guardar(); render(); cerrarSheet(); toast('Retiro registrado');
+};
+window.borrarRetiroGremio = function(id){
+  const r = (DB.gremio.retiros||[]).find(function(x){return x.id===id;}); if(!r) return;
+  if(!confirm('¿Borrar el retiro "'+r.motivo+'" ('+fmt(r.monto)+') del '+fFecha(r.fecha)+'?\n\nLa plata vuelve a la caja y a la ganancia del gremio.')) return;
+  DB.gremio.retiros = DB.gremio.retiros.filter(function(x){return x.id!==id;});
+  DB.movimientos = DB.movimientos.filter(function(m){return m.retiroGremio!==id;});
+  DB.caja += r.monto;
+  guardar(); render(); toast('Retiro borrado');
+};
+
+// ================= GREMIO: NUEVA ORDEN =================
+window.abrirNuevaOrden = function(){
+  const dl = DB.gremio.clientes.map(function(c){return '<option value="'+esc(c.nombre)+'">';}).join('');
+  abrirSheet(
+    '<div class="sheet-titulo">Nueva orden</div>'+
+    '<div class="sheet-sub">Reparación a gremio.</div>'+
+    '<label>N° de orden</label><input type="text" inputmode="numeric" id="oNum" value="'+siguienteOrden()+'">'+
+    '<label>Cliente</label><input id="oCliente" list="dlClientes" placeholder="Nombre del cliente gremio" oninput="chequearCliente()">'+
+    '<datalist id="dlClientes">'+dl+'</datalist>'+
+    '<div id="campoWA"><label>WhatsApp del cliente</label><input id="oWA" inputmode="tel" placeholder="11 2345 6789"></div>'+
+    '<div class="fila-2"><div><label>Marca</label><input id="oMarca" placeholder="Motorola"></div>'+
+    '<div><label>Modelo</label><input id="oModelo" placeholder="G8"></div></div>'+
+    '<label>¿Qué reparación se le hace?</label><input id="oRep" placeholder="Ej: cambio de módulo">'+
+    '<div class="fila-2"><div><label>Costo nuestro</label><input type="text" inputmode="numeric" id="oCosto" placeholder="0" oninput="previewGanOrden()"></div>'+
+    '<div><label>Precio gremio</label><input type="text" inputmode="numeric" id="oPrecio" placeholder="0" oninput="previewGanOrden()"></div></div>'+
+    '<div class="gan-preview"><span>Ganancia</span><span class="num" id="oGan">$ 0</span></div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confNuevaOrden()">Guardar orden</button></div>'
+  );
+  chequearCliente();
+};
+window.chequearCliente = function(){
+  const nombre = $('oCliente').value.trim();
+  const existe = DB.gremio.clientes.find(function(c){return c.nombre.toLowerCase()===nombre.toLowerCase();});
+  $('campoWA').style.display = existe ? 'none' : 'block';
+  if(existe) $('oWA').value = existe.whatsapp||'';
+};
+window.previewGanOrden = function(){
+  const g = num($('oPrecio').value) - num($('oCosto').value);
+  const el=$('oGan'); el.textContent=fmt(g);
+  el.parentElement.style.background = g>=0 ? 'var(--verde-suave)' : 'var(--rojo-suave)';
+  el.parentElement.style.color = g>=0 ? 'var(--verde)' : 'var(--rojo)';
+};
+window.confNuevaOrden = function(){
+  const cliente=$('oCliente').value.trim(), marca=$('oMarca').value.trim(), modelo=$('oModelo').value.trim(), rep=$('oRep').value.trim();
+  if(!cliente || !marca || !modelo || !rep){ toast('Completá cliente, equipo y reparación'); return; }
+  const nOrden = parseInt(String($('oNum').value).replace(/\D/g,''), 10);
+  if(!nOrden || nOrden < 1){ toast('Poné un número de orden válido'); return; }
+  if(ordenOcupada(nOrden)){ toast('Ya existe la orden #'+String(nOrden).padStart(3,'0')+'. Elegí otro número.'); return; }
+  let c = DB.gremio.clientes.find(function(x){return x.nombre.toLowerCase()===cliente.toLowerCase();});
+  const wa = $('oWA').value.trim();
+  if(!c){ DB.gremio.clientes.push({nombre:cliente, whatsapp:wa}); }
+  else if(wa && !c.whatsapp){ c.whatsapp=wa; }
+  DB.gremio.ordenes.push({
+    id:nid(), orden:nOrden, cliente:cliente, marca:marca, modelo:modelo,
+    reparacion:rep, costo:num($('oCosto').value), precio:num($('oPrecio').value),
+    estado:'observacion', pagado:false, fechaIngreso:hoyISO()
+  });
+  DB.gremio.proxOrden = siguienteOrden();
+  guardar(); render(); cerrarSheet(); toast('Orden #'+String(nOrden).padStart(3,'0')+' cargada');
+};
+
+// ================= GREMIO: LIBRETA DE CLIENTES =================
+window.abrirClientes = function(){
+  const G = DB.gremio;
+  if(!G.clientes.length){
+    abrirSheet('<div class="sheet-titulo">Clientes gremio</div><div class="sheet-sub">Todavía no hay clientes. Se agregan solos cuando cargás una orden nueva.</div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()" style="flex:1">Cerrar</button></div>');
+    return;
+  }
+  const filas = G.clientes.map(function(c, i){
+    const cant = G.ordenes.filter(function(o){return o.cliente.toLowerCase()===c.nombre.toLowerCase();}).length;
+    return '<div class="renglon"><span class="concepto">'+esc(c.nombre)+
+      '<span class="fecha-r">'+(c.whatsapp?esc(c.whatsapp):'sin WhatsApp')+' · '+cant+' orden'+(cant===1?'':'es')+'</span></span>'+
+      '<span class="guia"></span>'+
+      '<button class="btn btn-verde-s" style="flex:0 0 auto;padding:7px 14px;font-size:.78rem" onclick="abrirEditarCliente('+i+')">Editar</button></div>';
+  }).join('');
+  abrirSheet(
+    '<div class="sheet-titulo">Clientes gremio</div>'+
+    '<div class="sheet-sub">Tocá Editar para cambiar el nombre o el WhatsApp.</div>'+
+    '<div style="margin-top:10px">'+filas+'</div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()" style="flex:1">Cerrar</button></div>'
+  );
+};
+window.abrirEditarCliente = function(i){
+  const c = DB.gremio.clientes[i]; if(!c) return;
+  const cant = DB.gremio.ordenes.filter(function(o){return o.cliente.toLowerCase()===c.nombre.toLowerCase();}).length;
+  abrirSheet(
+    '<div class="sheet-titulo">Editar cliente</div>'+
+    '<div class="sheet-sub">'+(cant?('Si cambiás el nombre, se actualiza en sus '+cant+' orden'+(cant===1?'':'es')+'.'):'Este cliente no tiene órdenes.')+'</div>'+
+    '<label>Nombre</label><input id="ecNombre" value="'+esc(c.nombre)+'">'+
+    '<label>WhatsApp</label><input id="ecWA" inputmode="tel" value="'+esc(c.whatsapp||'')+'">'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="abrirClientes()">Volver</button>'+
+    '<button class="btn btn-verde" onclick="confEditarCliente('+i+')">Guardar</button></div>'+
+    (cant===0 ? '<div class="sheet-botones"><button class="btn btn-rojo-s" style="flex:1" onclick="eliminarCliente('+i+')">🗑 Eliminar cliente</button></div>' : '')
+  );
+};
+window.confEditarCliente = function(i){
+  const c = DB.gremio.clientes[i]; if(!c) return;
+  const nuevoNombre = $('ecNombre').value.trim();
+  if(!nuevoNombre){ toast('El nombre no puede quedar vacío'); return; }
+  const otro = DB.gremio.clientes.find(function(x,j){return j!==i && x.nombre.toLowerCase()===nuevoNombre.toLowerCase();});
+  if(otro){ toast('Ya existe un cliente con ese nombre'); return; }
+  const viejoNombre = c.nombre;
+  c.nombre = nuevoNombre;
+  c.whatsapp = $('ecWA').value.trim();
+  DB.gremio.ordenes.forEach(function(o){
+    if(o.cliente.toLowerCase()===viejoNombre.toLowerCase()) o.cliente = nuevoNombre;
+  });
+  guardar(); render(); cerrarSheet(); toast('Cliente actualizado');
+};
+window.eliminarCliente = function(i){
+  const c = DB.gremio.clientes[i]; if(!c) return;
+  const cant = DB.gremio.ordenes.filter(function(o){return o.cliente.toLowerCase()===c.nombre.toLowerCase();}).length;
+  if(cant){ toast('Tiene órdenes cargadas, no se puede borrar'); return; }
+  if(!confirm('¿Eliminar a '+c.nombre+' de la libreta?')) return;
+  DB.gremio.clientes.splice(i,1);
+  guardar(); render(); cerrarSheet(); toast('Cliente eliminado');
+};
+
+// ================= GREMIO: ESTADOS =================
+function ordenPorId(id){ return DB.gremio.ordenes.find(function(o){return o.id===id;}); }
+function siguienteOrden(){
+  let m = 0;
+  DB.gremio.ordenes.forEach(function(o){ if((o.orden||0) > m) m = o.orden; });
+  return m + 1;
+}
+function ordenOcupada(n, exceptoId){
+  return DB.gremio.ordenes.some(function(o){ return o.orden === n && o.id !== exceptoId; });
+}
+window.marcarListo = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  o.estado='listo'; o.fechaListo=hoyISO();
+  guardar(); render(); toast('Marcado como listo · avisale por WhatsApp');
+};
+window.marcarRetirado = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  o.estado='retirado'; o.fechaRetiro=hoyISO();
+  o.pagado = confirm('¿Te pagó '+fmt(o.precio)+'?\n\nAceptar = pagó · Cancelar = queda debiendo');
+  guardar(); render(); toast(o.pagado ? 'Retirado y pagado ✓' : 'Retirado · quedó debiendo');
+};
+window.marcarPagado = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  if(!confirm('¿Registrar el pago de '+fmt(o.precio)+' de '+o.cliente+'?')) return;
+  o.pagado=true; o.fechaPago=hoyISO();
+  guardar(); render(); toast('Pago registrado');
+};
+window.avisarWA = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  const c = DB.gremio.clientes.find(function(x){return x.nombre.toLowerCase()===o.cliente.toLowerCase();});
+  const numero = (c&&c.whatsapp)||'';
+  if(!numero){ toast('Este cliente no tiene WhatsApp cargado · editá la orden'); return; }
+  const equipo = o.marca+' '+o.modelo;
+  let msj;
+  if(o.estado==='sinarreglo'){
+    msj = 'Hola '+o.cliente+'! Somos de *La Clínica del Celular* 📱\nRevisamos tu *'+equipo+'* (orden #'+String(o.orden).padStart(3,'0')+') y lamentablemente no tiene arreglo posible. Podés pasar a retirarlo cuando quieras.\n¡Gracias por confiar en nosotros!';
+  } else {
+    msj = 'Hola '+o.cliente+'! 👋 Somos de *La Clínica del Celular* 📱\nTu *'+equipo+'* (orden #'+String(o.orden).padStart(3,'0')+') ya está *listo para retirar* ✅\nReparación: '+o.reparacion+'\nTotal: '+fmt(o.precio)+'\n¡Te esperamos!';
+  }
+  window.open(waLink(numero, msj), '_blank');
+};
+
+// ================= GREMIO: MENÚ / EDITAR =================
+window.abrirMenuOrden = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  abrirSheet(
+    '<div class="sheet-titulo">Orden #'+String(o.orden).padStart(3,'0')+'</div>'+
+    '<div class="sheet-sub">'+esc(o.cliente)+' · '+esc(o.marca)+' '+esc(o.modelo)+'</div>'+
+    '<div class="sheet-botones" style="flex-direction:column">'+
+    '<button class="btn btn-blanco" onclick="abrirEditarOrden(\''+id+'\')">✏️ Editar orden</button>'+
+    (o.estado!=='retirado' && o.estado!=='sinarreglo' ? '<button class="btn btn-blanco" onclick="marcarSinArreglo(\''+id+'\')">🚫 Marcar sin arreglo</button>' : '')+
+    (o.estado==='sinarreglo' ? '<button class="btn btn-blanco" onclick="devolverATaller(\''+id+'\')">↩️ Volver a observación</button>' : '')+
+    '<button class="btn btn-rojo-s" onclick="eliminarOrden(\''+id+'\')">🗑 Eliminar orden</button>'+
+    '</div>'
+  );
+};
+window.marcarSinArreglo = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  o.estado='sinarreglo';
+  guardar(); render(); cerrarSheet(); toast('Marcada sin arreglo');
+};
+window.devolverATaller = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  o.estado='observacion';
+  guardar(); render(); cerrarSheet(); toast('De vuelta en observación');
+};
+window.eliminarOrden = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  if(!confirm('¿Eliminar la orden #'+String(o.orden).padStart(3,'0')+' de '+o.cliente+'? No se puede deshacer.')) return;
+  DB.gremio.ordenes = DB.gremio.ordenes.filter(function(x){return x.id!==id;});
+  DB.gremio.proxOrden = siguienteOrden();
+  guardar(); render(); cerrarSheet(); toast('Orden eliminada');
+};
+window.abrirEditarOrden = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  const c = DB.gremio.clientes.find(function(x){return x.nombre.toLowerCase()===o.cliente.toLowerCase();});
+  abrirSheet(
+    '<div class="sheet-titulo">Editar orden #'+String(o.orden).padStart(3,'0')+'</div>'+
+    '<label>N° de orden</label><input type="text" inputmode="numeric" id="eoNum" value="'+o.orden+'">'+
+    '<label>Cliente</label><input id="eoCliente" value="'+esc(o.cliente)+'">'+
+    '<label>WhatsApp del cliente</label><input id="eoWA" inputmode="tel" value="'+esc(c?c.whatsapp:'')+'">'+
+    '<div class="fila-2"><div><label>Marca</label><input id="eoMarca" value="'+esc(o.marca)+'"></div>'+
+    '<div><label>Modelo</label><input id="eoModelo" value="'+esc(o.modelo)+'"></div></div>'+
+    '<label>Reparación</label><input id="eoRep" value="'+esc(o.reparacion)+'">'+
+    '<div class="fila-2"><div><label>Costo nuestro</label><input type="text" inputmode="numeric" id="eoCosto" value="'+(o.costo||'')+'"></div>'+
+    '<div><label>Precio gremio</label><input type="text" inputmode="numeric" id="eoPrecio" value="'+(o.precio||'')+'"></div></div>'+
+    '<div class="sheet-botones"><button class="btn btn-blanco" onclick="cerrarSheet()">Cancelar</button>'+
+    '<button class="btn btn-verde" onclick="confEditarOrden(\''+id+'\')">Guardar cambios</button></div>'
+  );
+};
+window.confEditarOrden = function(id){
+  const o = ordenPorId(id); if(!o) return;
+  const nOrden = parseInt(String($('eoNum').value).replace(/\D/g,''), 10);
+  if(!nOrden || nOrden < 1){ toast('Poné un número de orden válido'); return; }
+  if(ordenOcupada(nOrden, id)){ toast('Ya existe la orden #'+String(nOrden).padStart(3,'0')+'. Elegí otro número.'); return; }
+  const nuevoCliente = $('eoCliente').value.trim(), wa=$('eoWA').value.trim();
+  o.orden=nOrden; o.cliente=nuevoCliente; o.marca=$('eoMarca').value.trim(); o.modelo=$('eoModelo').value.trim();
+  o.reparacion=$('eoRep').value.trim(); o.costo=num($('eoCosto').value); o.precio=num($('eoPrecio').value);
+  DB.gremio.proxOrden = siguienteOrden();
+  let c = DB.gremio.clientes.find(function(x){return x.nombre.toLowerCase()===nuevoCliente.toLowerCase();});
+  if(!c){ DB.gremio.clientes.push({nombre:nuevoCliente, whatsapp:wa}); }
+  else { c.whatsapp = wa; }
+  guardar(); render(); cerrarSheet(); toast('Orden actualizada');
+};
+</script>
+</body>
+</html>
